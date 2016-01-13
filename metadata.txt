@@ -1,0 +1,39 @@
+# This file contains metadata for your plugin. Since 
+# version 2.0 of QGIS this is the proper way to supply 
+# information about a plugin. The old method of 
+# embedding metadata in __init__.py will 
+# is no longer supported since version 2.0.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=Shared SQL Queries
+qgisMinimumVersion=2.8
+description=This plugin allows to share SQL customised queries (with keywords) written by a db manager and that can be used in a friendly interface by QGIS end users.
+version=1.0
+author=Ville de Clermont-Ferrand
+email=hchristol@ville-clermont-ferrand.fr
+
+about=This plugin allows to share SQL customised queries (with keywords) written by a db manager. Those queries can then be used in a friendly interface by QGIS end users. SQL queries are stored in a shared directory. The result of querie can be either a table or a layer with geometry column that can be loaded into QGIS. SQL queries is for now to be used only with PostgreSql.
+
+tracker=github.com
+repository=github.com
+# End of mandatory metadata
+
+# Recommended items:
+
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=database, analysis, query, sql, postgresql, postgis
+
+homepage=github.com
+category=Plugins
+icon=icon.png
+# experimental flag
+experimental=False
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
