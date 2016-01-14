@@ -41,6 +41,7 @@ class QueryParamDialog(QDialog, FORM_CLASS):
         super(QueryParamDialog, self).showEvent(evnt)
         self.ParametersToDialogUpdate()
 
+    # add widgets to the dialog that are related to each editable parameter
     def ParametersToDialogUpdate(self):
         query = self.query
         self.labelQueryName.setText(query.name)
@@ -48,26 +49,25 @@ class QueryParamDialog(QDialog, FORM_CLASS):
         # index for param, header param separated from other param
         self.widgetParam = {"header": {}, "param": {}}
 
-        # show header parameters of query
-        header = self.query.header
-        if header is not None:
-            for paramName in header.keys():
+        for header_or_param in {"header", "param"}:
+
+            listParam = self.query.param
+            if header_or_param == "header":
+                listParam = self.query.header
+
+            def sort_param(key):
+                return listParam[key]["order"]
+
+            for paramName in sorted(listParam, key=sort_param): # in listParam:
 
                 # ignore hidden header parameters
-                if paramName in HIDDEN_HEADER_VALUE:
-                    continue
+                if header_or_param == "header":
+                    if paramName in HIDDEN_HEADER_VALUE:
+                        continue
 
-                value = header[paramName]
+                value = listParam[paramName]
                 # add param to dialog and index its widget
-                self.widgetParam["header"][paramName] = self.addParam(tr(paramName), value)
-
-        # show other sql parameters
-        param = self.query.param
-        if param is not None:
-            for paramName in param.keys():
-                value = param[paramName]
-                # add param to dialog and index its widget
-                self.widgetParam["param"][paramName] = self.addParam(paramName, value)
+                self.widgetParam[header_or_param][paramName] = self.addParam(tr(paramName), value)
 
         # adjust dialog size
         self.setFixedHeight(40 + self.gridLayoutHeader.rowCount() * 25)

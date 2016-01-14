@@ -62,25 +62,7 @@ def extractHeader(sql):
     return [header, sql_after_header]
 
 
-# Read a string of parameter : ## myParameter : Value ##
-def readParamter(stringParameter):
 
-    number_of_words= 2
-
-    # split in max number_of_attributes words (name type)
-    word = stringParameter.split(SEP, number_of_words-1)
-
-    if len(word) != number_of_words:
-        exc = SyntaxError()
-        exc.text = tr(u"Invalid parameter") + ":" + stringParameter
-        raise exc
-
-    paramName = word[0].strip()
-    typeOfParameter = 'string' #default type for parameter
-
-    #TODO : add a parameter type for richer type : #date, #float, #integer,...
-
-    return [paramName, {"type": typeOfParameter, "default": word[1].strip()}]
 
 #return parameters read from an sql string
 def extractCustomParameters(sql):
@@ -94,6 +76,8 @@ def extractCustomParameters(sql):
         # param between two tag : only on odd words
         if (count % 2) == 1:
             [paramName, value] = readParamter(block)
+            # store order to keep order when creating dialog
+            value["order"] = count
             param[paramName] = value
 
         count += 1
@@ -105,6 +89,28 @@ def extractCustomParameters(sql):
 
     # print "extractCustomParameters fin, param = " + str(param)
     return param
+
+
+# Read a string of parameter : ## myParameter : Value ##
+def readParamter(stringParameter):
+
+    number_of_words = 2
+
+    # split in max number_of_attributes words (name type)
+    word = stringParameter.split(SEP, number_of_words-1)
+
+    if len(word) != number_of_words:
+        exc = SyntaxError()
+        exc.text = tr(u"Invalid parameter") + ":" + stringParameter
+        raise exc
+
+    paramName = word[0].strip()
+    # default type for parameter
+    typeOfParameter = 'string'
+
+    # TODO : add a parameter type for richer type : #date, #float, #integer,...
+
+    return [paramName, {"type": typeOfParameter, "default": word[1].strip()}]
 
 
 # return an sql string where custom parameters has been set to their value, so

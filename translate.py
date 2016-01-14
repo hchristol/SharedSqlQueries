@@ -14,7 +14,7 @@ translation_fr = {
     u"Error": u"Erreur",
     u"Invalid parameter": u"Paramètre invalide",
     u"My Request": u"Ma Requête",
-    u"layer name": u"Nom de la couche",
+    u"layer name": u"Nom de la couche en sortie",
     u"Unable to add a layer corresponding to this query !": u"Impossible d'ajouter une couche correspondant à cette requête !"
 }
 

@@ -367,8 +367,6 @@ class SharedSqlQueries:
                 print sql
 
 
-
-
 #change width of widget to make it visible (or not)  in toolbar
 def setWidgetWidth(widget, minwidth, maxwidth):
     widget.setMinimumWidth(minwidth)

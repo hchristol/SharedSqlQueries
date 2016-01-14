@@ -1,2 +1,8 @@
+- optional qml file for query representation
+
+- add a parameter type for richer types : #date, #float, #integer,...
 - Keep param in memory
+
+Done :
+- ordered parameters
 
