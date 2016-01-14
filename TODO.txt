@@ -1,3 +1,2 @@
-- Accept query with no geometry column
-- Accept update query
 - Keep param in memory
+

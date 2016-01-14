@@ -78,7 +78,7 @@ class Connection:
 
     # add a layer from an sql query. If another layer with the same name already exists, delete it.
     # return the added layer
-    def sqlAddLayer(self, sql, layer_name, key_column, geom_column = "geom", sqlFilter = "" ):
+    def sqlAddLayer(self, sql, layer_name, key_column, geom_column="geom", sqlFilter=""):
 
         # remove utf8 header character :
         sql = sql.replace(unichr(65279), '')
@@ -87,6 +87,11 @@ class Connection:
         # remove ; and blanck at the end of sql
         sql = sql.strip(' ;')
 
+        # allow query with no geometry column
+        if geom_column == 'None':
+            geom_column = None;
+
+        # print "DEBUG sqlAddLayer geom_column " + str(geom_column)
         self.uri.setDataSource("", "(" + sql + ")", geom_column, sqlFilter, key_column)
 
         layer = QgsVectorLayer(self.uri.uri(), layer_name, "postgres")
@@ -94,13 +99,13 @@ class Connection:
             print "Layer failed to load!"
             return None
 
-        #Existing layer ?
+        # Existing layer ?
         layerList = QgsMapLayerRegistry.instance().mapLayersByName(layer_name)
         if (len(layerList)>0):
             QgsMapLayerRegistry.instance().removeMapLayer(layerList[0].id() )
 
-        QgsMapLayerRegistry.instance().addMapLayer(layer, True)
+        layer = QgsMapLayerRegistry.instance().addMapLayer(layer, True)
 
-        #print "Debug dbrequest sqlAddLayer : " + layer.name() + u" ajouté !"
+        # print "Debug dbrequest sqlAddLayer : " + layer.name() + u" ajouté !"
 
         return layer

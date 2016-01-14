@@ -8,6 +8,9 @@ from translate import tr
 FORM_CLASS, _ = loadUiType(os.path.join(
     os.path.dirname(__file__), 'query_param.ui'))
 
+# header param that should not be shown to user
+HIDDEN_HEADER_VALUE = {'gid', 'geom'}
+
 # dialog to edit query parameters
 class QueryParamDialog(QDialog, FORM_CLASS):
     def __init__(self, iface, dbrequest, query, parent=None):
@@ -33,39 +36,27 @@ class QueryParamDialog(QDialog, FORM_CLASS):
 
         self.buttonBox.accepted.connect(self.DialogToParametersUpdate)
 
-    # update parameters of query
-    def DialogToParametersUpdate(self):
-
-        # update all parameters from dialog widget
-        for header_or_param in {"header", "param"}:
-
-            listParam = self.query.param
-            if header_or_param == "header":
-                listParam = self.query.header
-
-            for paramName in self.widgetParam[header_or_param].keys():
-
-                widget = self.widgetParam[header_or_param][paramName]
-                param = listParam[paramName]
-
-                # update text param
-                param["value"] = widget.text()
-
-
-    # initialisation de la boite de dialogue
+    # dialog init
     def showEvent(self, evnt):
         super(QueryParamDialog, self).showEvent(evnt)
+        self.ParametersToDialogUpdate()
 
+    def ParametersToDialogUpdate(self):
         query = self.query
         self.labelQueryName.setText(query.name)
 
-        #index for param, header param separated from other param
+        # index for param, header param separated from other param
         self.widgetParam = {"header": {}, "param": {}}
 
         # show header parameters of query
         header = self.query.header
         if header is not None:
             for paramName in header.keys():
+
+                # ignore hidden header parameters
+                if paramName in HIDDEN_HEADER_VALUE:
+                    continue
+
                 value = header[paramName]
                 # add param to dialog and index its widget
                 self.widgetParam["header"][paramName] = self.addParam(tr(paramName), value)
@@ -78,11 +69,10 @@ class QueryParamDialog(QDialog, FORM_CLASS):
                 # add param to dialog and index its widget
                 self.widgetParam["param"][paramName] = self.addParam(paramName, value)
 
-
-        #adjust dialog size
+        # adjust dialog size
         self.setFixedHeight(40 + self.gridLayoutHeader.rowCount() * 25)
 
-    #add a param in dialog
+    # add a param in dialog
     def addParam(self, paramName, value):
         grid = self.gridLayoutHeader
 
@@ -101,3 +91,23 @@ class QueryParamDialog(QDialog, FORM_CLASS):
         edit_widget.setText(value)
         grid.addWidget(edit_widget, row_number, 1)
         return edit_widget
+
+    # update parameters of query
+    def DialogToParametersUpdate(self):
+
+        # update all parameters from dialog widget
+        for header_or_param in {"header", "param"}:
+
+            listParam = self.query.param
+            if header_or_param == "header":
+                listParam = self.query.header
+
+            for paramName in self.widgetParam[header_or_param].keys():
+
+                # widget linked to this parameter
+                widget = self.widgetParam[header_or_param][paramName]
+                param = listParam[paramName]
+
+                # update text param
+                param["value"] = widget.text()
+

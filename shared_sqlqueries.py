@@ -360,8 +360,12 @@ class SharedSqlQueries:
         if dialog.exec_() == QDialog.Accepted:
             # Perform query
             sql = query.updateFinalSql()
-            # gid : reserved column for id
-            self.dbrequest.sqlAddLayer(sql, query.headerValue("layer name"), query.headerValue("gid"))
+            # add the corresponding layer
+            layer = self.dbrequest.sqlAddLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
+            if layer is None:
+                self.errorMessage(self.tr(u"Unable to add a layer corresponding to this query !") + sql)
+                print sql
+
 
 
 
