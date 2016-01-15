@@ -87,6 +87,14 @@ class Connection:
         # remove ; and blanck at the end of sql
         sql = sql.strip(' ;')
 
+        #print sql
+
+        # error if forbiden caracter %
+        if '%' in sql:
+            exc = SyntaxError()
+            exc.text = u"% is not allowed in SQL QGIS layer : please use mod function instead"
+            raise exc
+
         # allow query with no geometry column
         if geom_column == 'None':
             geom_column = None

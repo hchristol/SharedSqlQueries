@@ -366,11 +366,18 @@ class SharedSqlQueries:
             # Perform query
             sql = query.updateFinalSql()
             # add the corresponding layer
-            layer = self.dbrequest.sqlAddLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
+
+            try:
+                layer = self.dbrequest.sqlAddLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
+            except SyntaxError as e:
+                # sql is correct but does not fit QGIS requirement (like '%' char)
+                self.errorMessage(self.tr(e.text))
+                return
 
             if layer is None:
                 self.errorMessage(self.tr(u"Unable to add a layer corresponding to this query !") + sql)
                 print sql
+                return
 
             # if there's a qml style file corresponding to the query, apply it to the newly added layer
             if os.path.exists(query.styleFilePath()):
