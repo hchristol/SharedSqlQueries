@@ -22,6 +22,7 @@ class CustomSqlQuery:
         self.path = path
         self.name = os.path.basename(path).replace(".sql", "")
         self.rawSql = stream.read()
+
         [self.header, self.sql] = extractHeader(self.rawSql)
         self.param = extractCustomParameters(self.sql)
         self.finalSql = None
@@ -34,6 +35,9 @@ class CustomSqlQuery:
     # return a header value, or its default value if no header found
     def headerValue(self, paramName):
         return paramValue(self.header, paramName, DEFAULT_HEADER_VALUE[paramName]["value"])
+
+    def styleFilePath(self):
+        return os.path.dirname(self.path) + "/" + self.name + ".qml"
 
 
 # extract first /* */ comment at the beginning of the file, and return sql without this header

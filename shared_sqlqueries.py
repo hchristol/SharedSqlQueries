@@ -350,10 +350,15 @@ class SharedSqlQueries:
 
         try:
             query = CustomSqlQuery(self.selectedQueryPath)
+        except UnicodeDecodeError:
+            self.errorMessage(self.tr(u"Query File is not UTF8 encoded ! Please convert it to UTF8 !"))
+            return
         except SyntaxError as e:
             self.errorMessage(e.text)
+            return
         except Exception as e:
             self.errorMessage(str(e))
+            return
 
         # open param dialog
         dialog = QueryParamDialog(self.iface, self.dbrequest, query, self.toolbar)
@@ -362,12 +367,17 @@ class SharedSqlQueries:
             sql = query.updateFinalSql()
             # add the corresponding layer
             layer = self.dbrequest.sqlAddLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
+
             if layer is None:
                 self.errorMessage(self.tr(u"Unable to add a layer corresponding to this query !") + sql)
                 print sql
 
+            # if there's a qml style file corresponding to the query, apply it to the newly added layer
+            if os.path.exists(query.styleFilePath()):
+                layer.loadNamedStyle(query.styleFilePath())
 
-#change width of widget to make it visible (or not)  in toolbar
+
+# change width of widget to make it visible (or not)  in toolbar
 def setWidgetWidth(widget, minwidth, maxwidth):
     widget.setMinimumWidth(minwidth)
     widget.setMaximumWidth(maxwidth)

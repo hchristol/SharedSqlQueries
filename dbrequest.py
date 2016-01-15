@@ -89,23 +89,20 @@ class Connection:
 
         # allow query with no geometry column
         if geom_column == 'None':
-            geom_column = None;
+            geom_column = None
 
         # print "DEBUG sqlAddLayer geom_column " + str(geom_column)
         self.uri.setDataSource("", "(" + sql + ")", geom_column, sqlFilter, key_column)
 
         layer = QgsVectorLayer(self.uri.uri(), layer_name, "postgres")
-        if not layer:
-            print "Layer failed to load!"
-            return None
 
         # Existing layer ?
         layerList = QgsMapLayerRegistry.instance().mapLayersByName(layer_name)
         if (len(layerList)>0):
             QgsMapLayerRegistry.instance().removeMapLayer(layerList[0].id() )
 
+        # add layer to registry and affect same layer variable to the result,
+        # to be sure it had been correctly added (None result if not)
         layer = QgsMapLayerRegistry.instance().addMapLayer(layer, True)
-
-        # print "Debug dbrequest sqlAddLayer : " + layer.name() + u" ajouté !"
 
         return layer
