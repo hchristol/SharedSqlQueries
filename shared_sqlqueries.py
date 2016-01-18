@@ -365,15 +365,44 @@ class SharedSqlQueries:
         # open param dialog
         dialog = QueryParamDialog(self.iface, self.dbrequest, query, self.toolbar)
         if dialog.exec_() == QDialog.Accepted:
-            # Perform query
-            sql = query.updateFinalSql()
-            # add the corresponding layer
 
+            # format query as a Qgis readable sql source
+            sql = query.updateFinalSql()
+
+            # add the corresponding layer
             try:
+
+                # save query in a memory layer
                 if query.headerValue("layer storage") == "memory":
                     layer = self.dbrequest.sqlAddMemoryLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
-                else:
+
+                # save query directly as a sql layer
+                elif query.headerValue("layer storage") == "source":
                     layer = self.dbrequest.sqlAddLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
+
+                # save query in a file layer
+                else:
+                    type = query.headerValue("layer storage").lower()
+                    driver = None
+                    if type == "geojson":
+                        driver = "GeoJSON"
+                    if type == "shp":
+                        driver = "ESRI Shapefile"
+
+                    if driver is None:
+                        self.errorMessage(self.tr(u"Unknown file type : ") + str(type))
+                        return
+
+                    directory = query.headerValue("layer directory")
+                    if directory is None:
+                        self.errorMessage(self.tr(u"No layer directory parameter found in query !"))
+                        return
+                    name = query.headerValue("layer name")
+                    layer = self.dbrequest.sqlAddFileLayer(sql, driver, directory + "/" + name + "." + type, name,
+                                    query.headerValue("gid"), query.headerValue("geom"))
+
+
+
             except SyntaxError as e:
                 # sql is correct but does not fit QGIS requirement (like '%' char)
                 self.errorMessage(self.tr(e.text))

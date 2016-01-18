@@ -8,7 +8,7 @@ connection to pg a database whose paramaters are read in json config
 import os
 from db_manager.db_plugins.postgis.connector import PostGisDBConnector
 from qgis.core import *
-from processing.tools.vector import VectorWriter
+from qgis.core import QgsVectorFileWriter
 
 class Connection:
     #param : list with host, port, dbname :
@@ -137,6 +137,27 @@ class Connection:
 
         # add to legend
         return addLayer(memory_layer)
+
+    # add a layer from sql and save it as a file (ogr_driver can be GeoJSON, ESRI Shapefile, ...).
+    # Suited for time consuming query.
+    def sqlAddFileLayer(self, sql, ogr_driver, layer_path, layer_name, key_column, geom_column="geom", sqlFilter=""):
+
+        sql = makeSqlValidForLayer(sql)
+
+        self.uri.setDataSource("", "(" + sql + ")", geom_column, sqlFilter, key_column)
+
+        # layer postgis to read features
+        pg_layer = QgsVectorLayer(self.uri.uri(), "temporary layer", "postgres")
+
+        error = QgsVectorFileWriter.writeAsVectorFormat(pg_layer, layer_path, "utf-8", None, ogr_driver)
+
+        if error == QgsVectorFileWriter.NoError:
+            file_layer = QgsVectorLayer(layer_path, layer_name, "ogr")
+            return addLayer(file_layer)
+        else:
+            exc = SyntaxError()
+            exc.text = u"QgsVectorFileWriter error : " + str(error)
+            raise sql
 
 
 # transform sql so it can be loader as a layer data source

@@ -45,7 +45,12 @@ class CustomSqlQuery:
 
     # return a header value, or its default value if no header found
     def headerValue(self, paramName):
-        return paramValue(self.header, paramName, DEFAULT_HEADER_VALUE[paramName]["value"])
+        if paramName in DEFAULT_HEADER_VALUE:
+            # there is a default value
+            return paramValue(self.header, paramName, DEFAULT_HEADER_VALUE[paramName]["value"])
+        else:
+            # there is no default value
+            return paramValue(self.header, paramName)
 
     def styleFilePath(self):
         return os.path.dirname(self.path) + "/" + self.name + ".qml"
