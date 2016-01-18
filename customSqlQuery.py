@@ -12,7 +12,18 @@ TAG = "##"
 SEP = " : "
 
 # default values for header
-DEFAULT_HEADER_VALUE = {'gid': {"value": 'gid'}, 'geom': {"value": 'geom'}, 'layer name': {"value": tr('My Request')}}
+# gid : name of column integer id
+# geom : name of geometry column
+# layer name : name of layer that will store resulting data
+# layer storage : type of storage for this layer :
+#       - source (sql query is directly the data source, memory
+#       - memory : copy in memory of the sql query
+DEFAULT_HEADER_VALUE = {
+    'gid': {"value": 'gid'},
+    'geom': {"value": 'geom'},
+    'layer name': {"value": tr('My Request')},
+    'layer storage': {"value": "source"}
+}
 
 class CustomSqlQuery:
 

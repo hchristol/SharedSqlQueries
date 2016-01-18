@@ -20,7 +20,9 @@ translation_fr = {
     u"Query File is not UTF8 encoded ! Please convert it to UTF8 !":
         u"Le fichier de requête n'est pas en UTF8 ! Merci de le convertir en UTF8 !",
     u"% is not allowed in SQL QGIS layer : please use mod function instead":
-        u"% n'est pas autorisé dans une couche SQL QGIS : utilisez la fonction mod à la place"
+        u"% n'est pas autorisé dans une couche SQL QGIS : utilisez la fonction mod à la place",
+    u"No geometry type found for memory layer ! Unable to load unknown geometry type !":
+        u"Aucun type de géometrie pour la couche en mémoire ! Impossible d'ouvrir les géométrie de type inconnu !"
 }
 
 

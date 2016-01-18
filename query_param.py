@@ -9,7 +9,7 @@ FORM_CLASS, _ = loadUiType(os.path.join(
     os.path.dirname(__file__), 'query_param.ui'))
 
 # header param that should not be shown to user
-HIDDEN_HEADER_VALUE = {'gid', 'geom'}
+HIDDEN_HEADER_VALUE = {'gid', 'geom', 'layer storage'}
 
 # dialog to edit query parameters
 class QueryParamDialog(QDialog, FORM_CLASS):

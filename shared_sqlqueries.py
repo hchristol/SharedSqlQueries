@@ -38,7 +38,9 @@ from config import JsonFile
 import translate
 from customSqlQuery import CustomSqlQuery
 from dbrequest import Connection
+from dbrequest import makeSqlValidForLayer
 from query_param import QueryParamDialog
+
 
 # Import the code for the DockWidget
 from shared_sqlqueries_dockwidget import SharedSqlQueriesDockWidget
@@ -368,7 +370,10 @@ class SharedSqlQueries:
             # add the corresponding layer
 
             try:
-                layer = self.dbrequest.sqlAddLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
+                if query.headerValue("layer storage") == "memory":
+                    layer = self.dbrequest.sqlAddMemoryLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
+                else:
+                    layer = self.dbrequest.sqlAddLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
             except SyntaxError as e:
                 # sql is correct but does not fit QGIS requirement (like '%' char)
                 self.errorMessage(self.tr(e.text))
@@ -376,7 +381,8 @@ class SharedSqlQueries:
 
             if layer is None:
                 self.errorMessage(self.tr(u"Unable to add a layer corresponding to this query !") + sql)
-                print sql
+                # sql which is used in layer query
+                print makeSqlValidForLayer(sql)
                 return
 
             # if there's a qml style file corresponding to the query, apply it to the newly added layer
