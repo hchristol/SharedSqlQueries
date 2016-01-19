@@ -1,20 +1,23 @@
 # SharedSqlQueries for [QGIS](http://qgis.org)
 
-This plugin allows to share SQL customised queries (with user editable parameters) written by a db manager.
+This QGIS plugin allows to share SQL customised queries (with user editable parameters) written by a db manager.
 Those queries can then be used in a friendly interface by QGIS end users.
 SQL queries are stored in a shared directory.
 The result of querie can be either a table or a layer with geometry column that can be loaded into QGIS.
-SQL queries is - for now - to be used only with PostgreSql.
+SQL queries is - for now - to be used only with PostgreSql/Postgis.
 
 # Install
 Copy this directory in your plugin directory.
 Edit config.json and type your own folder to store SQL queries.
 
 In this query folder, create a new config.json file that contains the following :
+```json
 {
+    "queries_folder": "path to your folder",
 	"bdpostgis": { "host":"my host","port":"5432","dbname":"my db name" }
 }
-(you can add user and password in parameters if required)
+```
+You can add **user** and **password** in bdpostgis parameters if required.
 
 # SQL files
 They have to be put in subdirectory of the main query folder.
@@ -52,7 +55,7 @@ WHERE p.idsupport = s.idsupport
 ```
 
 # Header parameters
-Put in the comment block at the beginning of your request
+Put header parameters in the comment block at the beginning of your request
 * **layer name** : name of the output layer (default : My Query)
 * **gid** : name of the required integer key column (default : gid)
 * **geom** : name of the geometry column (default : geom). Can be 'None' if no geometry is returned by query.
@@ -67,7 +70,8 @@ Put in the comment block at the beginning of your request
 Any parameter can be stored in sql query. Each parameter will be editable by user before query will be executed.
 
 # Forbidden characters
-The '%' character is not allowed because Qgis refuse to load sql layer with this character. Use math _mod()_ function instead.
+The '%' character is not allowed when layer storage is _source_ because Qgis refuse to load sql layer with this character.
+Use math _mod()_ function instead, or use a different layer storage.
 
 # QML associated files
 You can create a qml file (layer style file for Qgis) whose name is the name of the query file.

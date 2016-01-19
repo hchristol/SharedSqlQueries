@@ -92,12 +92,9 @@ class SharedSqlQueries:
         #combo of queries files
         self.comboxQueries = None
 
-        #first config file (in plugin directory): only the directory for shared queries
-        config = JsonFile()
-        self.queriesFolder = config.value("queries_folder")
-
-        #main config file : in the directory of shared queries
-        self.config = JsonFile(self.queriesFolder + "/config.json")
+        #config file (in plugin directory) :
+        self.config = JsonFile()
+        self.queriesFolder = self.config.value("queries_folder")
 
         #database
         self.dbrequest = Connection(self.config.value("bdpostgis"))
@@ -398,7 +395,20 @@ class SharedSqlQueries:
                         self.errorMessage(self.tr(u"No layer directory parameter found in query !"))
                         return
                     name = query.headerValue("layer name")
-                    layer = self.dbrequest.sqlAddFileLayer(sql, driver, directory + "/" + name + "." + type, name,
+
+                    # new layer name and file name if file already exists
+                    filepath = directory + "/" + name + "." + type
+                    filecount = 1
+                    new_name = name
+                    while os.path.exists(filepath):
+                        # file already exists
+                        filecount += 1
+                        new_name = name + "_" + str(filecount)
+                        filepath = directory + "/" + new_name + "." + type
+                    name = new_name
+
+                    # add new layer
+                    layer = self.dbrequest.sqlAddFileLayer(sql, driver, filepath, name,
                                     query.headerValue("gid"), query.headerValue("geom"))
 
 

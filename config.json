@@ -1,3 +1,4 @@
 {
-	"queries_folder": "Q:/RequetesPartagees"
+	"queries_folder": "Q:/RequetesPartagees",
+	"bdpostgis": { "host":"bdusrv17","port":"5432","dbname":"clfd" }
 }

@@ -9,15 +9,16 @@
 [general]
 name=Shared SQL Queries
 qgisMinimumVersion=2.8
-description=This plugin allows to share SQL customised queries (with keywords) written by a db manager and that can be used in a friendly interface by QGIS end users.
-version=1.3
+description=This plugin allows to share SQL queries (with custom parameters) written by a db manager and that can be used in a friendly interface by QGIS end users.
+version=1.4
 author=Ville de Clermont-Ferrand
 email=hchristol@ville-clermont-ferrand.fr
 
-about=This plugin allows to share SQL customised queries (with keywords) written by a db manager. Those queries can then be used in a friendly interface by QGIS end users. SQL queries are stored in a shared directory. The result of querie can be either a table or a layer with geometry column that can be loaded into QGIS. SQL queries is for now to be used only with PostgreSql.
+about=This plugin allows to share SQL queries (with custom parameters) written by a db manager. Those queries can then be used in a friendly interface by QGIS end users. SQL queries are stored in a shared directory. The result of querie can be either a table or a layer with geometry column that can be loaded into QGIS. SQL queries is for now to be used only with PostgreSql.
 
-tracker=github.com
-repository=github.com
+homepage=https://github.com/hchristol/SharedSqlQueries
+tracker=https://github.com/hchristol/SharedSqlQueries/issues
+repository=https://github.com/hchristol/SharedSqlQueries
 # End of mandatory metadata
 
 # Recommended items:

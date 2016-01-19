@@ -80,7 +80,7 @@ class Connection:
     # return the added layer
     def sqlAddLayer(self, sql, layer_name, key_column, geom_column="geom", sqlFilter=""):
 
-        sql = makeSqlValidForLayer(sql)
+        sql = makeSqlValidForLayer(sql, ['%'])
 
         # allow query with no geometry column
         if geom_column == 'None':
@@ -161,7 +161,7 @@ class Connection:
 
 
 # transform sql so it can be loader as a layer data source
-def makeSqlValidForLayer(sql):
+def makeSqlValidForLayer(sql, forbidenChar = []):
     # remove utf8 header character :
     sql = sql.replace(unichr(65279), '')
     # remove new line characters
@@ -172,10 +172,11 @@ def makeSqlValidForLayer(sql):
     #print sql
 
     # error if forbiden caracter %
-    if '%' in sql:
-        exc = SyntaxError()
-        exc.text = u"% is not allowed in SQL QGIS layer : please use mod function instead"
-        raise exc
+    for c in forbidenChar:
+        if c in sql:
+            exc = SyntaxError()
+            exc.text = u"% is not allowed in SQL QGIS layer : please use mod function instead"
+            raise exc
 
     return sql
 
