@@ -57,7 +57,12 @@ WHERE p.idsupport = s.idsupport
 # Header parameters
 Put header parameters in the comment block at the beginning of your request
 * **layer name** : name of the output layer (default : My Query)
-* **gid** : name of the required integer key column (default : gid)
+* **gid** : name of the required integer key column (default : gid).
+    ** WARNING ** : if your gid has duplicate values, Qgis will crash. Ensure your gid has unique values !
+    Use this gid if you don't know how to deal with duplicate gid :
+   ```sql
+   SELECT row_number() over() as gid, ...
+   ```
 * **geom** : name of the geometry column (default : geom). Can be 'None' if no geometry is returned by query.
 * **layer storage** : type of storage.
     * source : sql query is stored in the output layer. Sql query is performed each time the map is refreshed. Not suitable for time consuming queries.

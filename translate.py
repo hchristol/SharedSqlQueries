@@ -12,6 +12,8 @@ translation_fr = {
     u"Open": u"Ouvrir",
     u"Run": u"Exécuter",
     u"Error": u"Erreur",
+    u"No config.json file found ! A default one is created but you have to edit it (in your plugin directory)":
+        u"Aucun fichier de configuration trouvé ! Un fichier par défaut est créé mais vous devez le renseigner (dans votre dossier de plugin)",
     u"Invalid parameter": u"Paramètre invalide",
     u"My Request": u"Ma Requête",
     u"layer name": u"Nom de la couche en sortie",

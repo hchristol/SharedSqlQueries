@@ -37,7 +37,7 @@ class JsonFile:
     def __init__(self, directoryPath=None):
         # load config file
         if directoryPath is None:
-            directoryPath = os.path.dirname(__file__) + '\\config.json'
+            directoryPath = os.path.dirname(__file__) + '/config.json'
 
         self.config = json.loads(open(directoryPath, 'r', "utf8").read())
 

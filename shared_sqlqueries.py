@@ -26,7 +26,7 @@ import os.path
 
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QStandardItem, QIcon, QAction, QComboBox, QSizePolicy, \
-    QStandardItemModel, QTreeView, QPushButton, QHBoxLayout, QDialog
+    QStandardItemModel, QTreeView, QPushButton, QHBoxLayout, QDialog, QApplication
 
 from qgis.gui import QgsMessageBar
 
@@ -34,6 +34,7 @@ from qgis.gui import QgsMessageBar
 import resources
 
 from config import JsonFile
+from shutil import copyfile
 
 import translate
 from customSqlQuery import CustomSqlQuery
@@ -92,16 +93,39 @@ class SharedSqlQueries:
         #combo of queries files
         self.comboxQueries = None
 
+        self.config = None
+        self.queriesFolder = None
+        self.dbrequest = None
+
+        self.selectedQueryPath = None
+
+        self.pluginIsActive = False
+
+    # init related to config file. Return False if no config.json has been found
+    def init_config(self):
+
+        #just once
+        if self.config is not None:
+            return True
+
         #config file (in plugin directory) :
-        self.config = JsonFile()
+        configpath = os.path.dirname(__file__) + '/config.json'
+        try:
+            self.config = JsonFile(configpath)
+        except IOError:
+            # copy default config json if it does not exist
+            self.errorMessage(self.tr(
+                u"No config.json file found ! A default one is created but you have to edit it (in your plugin directory)"))
+            configpath_default = os.path.dirname(__file__) + '/config_default.json'
+            copyfile(configpath_default, configpath)
+            return False
+
         self.queriesFolder = self.config.value("queries_folder")
 
         #database
         self.dbrequest = Connection(self.config.value("bdpostgis"))
 
-        self.selectedQueryPath = None
-
-        self.pluginIsActive = False
+        return True
 
 
     # noinspection PyMethodMayBeStatic
@@ -273,6 +297,11 @@ class SharedSqlQueries:
     def run(self):
         """Run method that loads and starts the plugin"""
 
+        # look for config file (required at the first run)
+        if not self.init_config():
+            # invalid config file
+            return
+
         if not self.pluginIsActive:
             self.pluginIsActive = True
 
@@ -407,13 +436,20 @@ class SharedSqlQueries:
                         filepath = directory + "/" + new_name + "." + type
                     name = new_name
 
+
+                    #wait cursor
+                    QApplication.setOverrideCursor(Qt.WaitCursor)
+
                     # add new layer
                     layer = self.dbrequest.sqlAddFileLayer(sql, driver, filepath, name,
                                     query.headerValue("gid"), query.headerValue("geom"))
 
+                    QApplication.setOverrideCursor(Qt.ArrowCursor)
+
 
 
             except SyntaxError as e:
+                QApplication.setOverrideCursor(Qt.ArrowCursor)
                 # sql is correct but does not fit QGIS requirement (like '%' char)
                 self.errorMessage(self.tr(e.text))
                 return

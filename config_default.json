@@ -1,0 +1,4 @@
+{
+    "queries_folder": "path to your folder",
+    "bdpostgis": { "host":"my host","port":"5432","dbname":"my db name", "user" : "my user (optional)", "password (optional)" : "my password" }
+}

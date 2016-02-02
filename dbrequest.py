@@ -111,6 +111,7 @@ class Connection:
         if pg_layer.geometryType() > 2:
             exc = SyntaxError()
             exc.text = u"No geometry type found for memory layer ! Unable to load unknown geometry type !"
+            print sql
             raise exc
 
         memory_layer = QgsVectorLayer(['Point', 'MultiLineString', 'MultiPolygon'][pg_layer.geometryType()] +
