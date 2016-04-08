@@ -10,7 +10,7 @@
 name=Shared SQL Queries
 qgisMinimumVersion=2.8
 description=This plugin allows to share SQL queries (with custom parameters) written by a db manager and that can be used in a friendly interface by QGIS end users.
-version=1.4
+version=1.5
 author=Ville de Clermont-Ferrand
 email=hchristol@ville-clermont-ferrand.fr
 

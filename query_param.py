@@ -1,6 +1,6 @@
 ﻿import os
 from PyQt4.uic import loadUiType
-from PyQt4.QtGui import QDialog, QLabel, QLineEdit
+from PyQt4.QtGui import QDialog, QLabel, QLineEdit, QDateEdit, QComboBox
 
 from customSqlQuery import CustomSqlQuery
 from translate import tr
@@ -77,8 +77,12 @@ class QueryParamDialog(QDialog, FORM_CLASS):
         grid = self.gridLayoutHeader
 
         row_number = grid.rowCount()
+
+        # type of parameter
+        [type_widget, type_options, name] = splitParamNameAndType(paramName)
+
         # name
-        grid.addWidget(QLabel(paramName), row_number, 0)
+        grid.addWidget(QLabel(name), row_number, 0)
 
         # value
         if "value" in value:
@@ -86,9 +90,23 @@ class QueryParamDialog(QDialog, FORM_CLASS):
         else:
             value = value["default"]
 
-        # value : string
-        edit_widget = QLineEdit()
-        edit_widget.setText(value)
+        # update widget
+
+        if type_widget == "text":
+            edit_widget = QLineEdit()
+            edit_widget.setText(value)
+
+        elif type_widget == "date":
+            edit_widget = QDateEdit()
+            edit_widget.setCalendarPopup(True)
+            edit_widget.lineEdit().setText(value)
+
+        elif type_widget == "select":
+            edit_widget = QComboBox()
+            edit_widget.setEditable(True)
+            self.dbrequest.sqlFillQtWidget(type_options, edit_widget)
+            edit_widget.setEditText(value)
+
         grid.addWidget(edit_widget, row_number, 1)
         return edit_widget
 
@@ -108,6 +126,41 @@ class QueryParamDialog(QDialog, FORM_CLASS):
                 widget = self.widgetParam[header_or_param][paramName]
                 param = listParam[paramName]
 
-                # update text param
-                param["value"] = widget.text()
+                [type_widget, type_options, name] = splitParamNameAndType(paramName)
 
+                # update value param
+
+                if type_widget == "text":
+                    param["value"] = widget.text()
+
+                elif type_widget == "date":
+                    param["value"] = widget.lineEdit().text()
+
+                elif type_widget == "select":
+                    param["value"] = widget.currentText()
+
+
+# return the type of parameter
+def splitParamNameAndType(paramName):
+    # default values
+    type_widget = "text"
+    type_options = ""
+    name = paramName
+
+    for possible_type in ["text", "date", "select"]:
+        searched = possible_type + " "
+        i = paramName.strip().find(searched)
+        if i == 0:
+            type_widget = possible_type
+
+            # type options
+            if possible_type == "select":
+                i_end_select = paramName.strip().find(";")
+                type_options = paramName.strip()[:i_end_select]
+                searched = type_options + ";"
+
+            name = paramName.strip()[len(searched):].strip()
+
+            return [type_widget, type_options, name]
+
+    return [type_widget, type_options, name]

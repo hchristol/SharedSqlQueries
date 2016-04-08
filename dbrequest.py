@@ -9,6 +9,8 @@ import os
 from db_manager.db_plugins.postgis.connector import PostGisDBConnector
 from qgis.core import *
 from qgis.core import QgsVectorFileWriter
+from PyQt4 import QtGui
+from PyQt4.QtCore import *
 
 class Connection:
     #param : list with host, port, dbname :
@@ -160,6 +162,18 @@ class Connection:
             exc.text = u"QgsVectorFileWriter error : " + str(error)
             raise sql
 
+    # fill a QtWidget (QComboBox) with the result of an sql query
+    def sqlFillQtWidget(self, sql, list):
+        [header, data, rowCount] = self.sqlExec(sql)
+        model = QtGui.QStandardItemModel(list)
+        for line in data:
+            item = QtGui.QStandardItem()
+            item.setText(line[0])
+            item.setData(line, Qt.UserRole)
+            model.appendRow(item)
+        list.setModel(model)
+        list.show()
+        return [header, data, rowCount]
 
 # transform sql so it can be loader as a layer data source
 def makeSqlValidForLayer(sql, forbidenChar = []):

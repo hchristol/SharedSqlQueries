@@ -47,10 +47,10 @@ FROM shv.panneau p, shv.panonceau pco, adresse.voie v, shv.support s
 WHERE p.idsupport = s.idsupport
 	AND p.idpanneau = pco.idpanneau
 	AND s.voie1 = v.idvoie
-	AND p.type = ## Type de panneau : 'B6d' ##
-	AND pco.type = ## Type de panonceau : 'M6h' ##
-	AND p.creation_date >= ## Après le : '2015/01/01' ##
-	AND p.creation_date < ## Avant le : '2015/01/01' ##
+	AND p.type = ## select distinct '''' || type || ''''  from shv.panneau; Type de panneau : 'B6d' ##
+	AND pco.type = ## select distinct '''' || type || ''''  from shv.panonceau; Type de panonceau : 'M6h' ##
+	AND p.creation_date >= to_date('## date Après le : 01/01/2015 ##','DD/MM/YYYY')
+	AND p.creation_date < to_date('## date Avant le : 01/01/2016 ##','DD/MM/YYYY')
 	ORDER BY adresse;
 ```
 
@@ -73,10 +73,23 @@ Put header parameters in the comment block at the beginning of your request
 
 # SQL parameters
 Any parameter can be stored in sql query. Each parameter will be editable by user before query will be executed.
+Same parameter can be duplicated. User will be asked only once for it. Just copy identical text parameter in your sql code.
+Type of parameters :
+* **text** : this is the default parameters : a simple string text
+* **date** : if your parameter starts with this keyword, your parameter will appear in a date widget.
+* **select** : if your parameter starts with this keyword, your parameter will be diplayed in a combo box. Items of the
+    combo are the result of the select query you type (see example above).
+    Your query must end with a **;** to split it from the rest of your parameter description.
 
 # Forbidden characters
 The '%' character is not allowed when layer storage is _source_ because Qgis refuse to load sql layer with this character.
 Use math _mod()_ function instead, or use a different layer storage.
+
+# Qgis dump
+If Qgis crashes, it's probably because your query does not have the required fields. Ensure that your request return at least a gid column.
+
+# Query with no geom column
+At the moment, it works only with **layer storage** : source
 
 # QML associated files
 You can create a qml file (layer style file for Qgis) whose name is the name of the query file.
