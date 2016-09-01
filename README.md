@@ -75,11 +75,25 @@ Put header parameters in the comment block at the beginning of your request
 Any parameter can be stored in sql query. Each parameter will be editable by user before query will be executed.
 Same parameter can be duplicated. User will be asked only once for it. Just copy identical text parameter in your sql code.
 Type of parameters :
+
 * **text** : this is the default parameters : a simple string text
+
 * **date** : if your parameter starts with this keyword, your parameter will appear in a date widget.
+
 * **select** : if your parameter starts with this keyword, your parameter will be diplayed in a combo box. Items of the
-    combo are the result of the select query you type (see example above).
+    combo are the result of the select query you type. Example :
+```sql
+... AND class = ## select distinct '''' || class || ''''  from my_table; Class : 'Default value' ##
+```
     Your query must end with a **;** to split it from the rest of your parameter description.
+
+* **selected_item** : if your parameter starts with this keyword, that means the user must choose an entity on the map. Then the attribute used in sql will be the attribute of the entity. This attribute is given in the optional type attribute :
+```sql
+... AND name = ## selected_item name; Name : ##
+```
+    Your query must end with a **;** to split it from the rest of your parameter description.
+    *Important* : If specific attribute "geom" is given, then the geom of the entity will be used in request (the ST_GeomFromEWKT will be used automaticaly to transform geometry from Qgis geometry to sql)
+
 
 # Forbidden characters
 The '%' character is not allowed when layer storage is _source_ because Qgis refuse to load sql layer with this character.

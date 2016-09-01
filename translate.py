@@ -27,7 +27,17 @@ translation_fr = {
     u"No geometry type found for memory layer ! Unable to load unknown geometry type !":
         u"Aucun type de géometrie pour la couche en mémoire ! Impossible d'ouvrir les géométrie de type inconnu !",
     u"No layer directory parameter found in query !":
-        u"Pas de paramètre de dossier trouvé dans la requête !"
+        u"Pas de paramètre de dossier trouvé dans la requête !",
+    u"Select just one feature on map !":
+        u"Selectionnez une et une seule entité sur la carte !",
+    u"Select a vector layer !":
+        u"Sélectionnez une couche vectorielle !",
+    u"This feature does not have such an attribute : ":
+        u"Cette entité ne possède pas cet attribut : ",
+    u"Attribute of selected feature":
+        u"Attribut de l'entité sélectionné",
+    u"Geometry of selected feature":
+        u"Géométrie de l'entité sélectionnée"
 }
 
 

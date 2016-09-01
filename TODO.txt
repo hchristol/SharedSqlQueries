@@ -1,7 +1,6 @@
-- query with a selected geometry
-- Keep param in memory
 
 Done :
+- query with a selected geometry or feature
 - add a parameter type for richer types : date, select
 - create config.json if it does not exists
 - wait cursor

@@ -2,6 +2,9 @@
 from PyQt4.uic import loadUiType
 from PyQt4.QtGui import QDialog, QLabel, QLineEdit, QDateEdit, QComboBox
 
+from qgis.gui import QgsMapCanvas
+from qgis.core import QgsVectorLayer
+
 from customSqlQuery import CustomSqlQuery
 from translate import tr
 
@@ -33,6 +36,9 @@ class QueryParamDialog(QDialog, FORM_CLASS):
 
         # index of widget by param name
         self.widgetParam = None
+
+        # in case of failure
+        self.errorMessage = ""
 
         self.buttonBox.accepted.connect(self.DialogToParametersUpdate)
 
@@ -107,6 +113,12 @@ class QueryParamDialog(QDialog, FORM_CLASS):
             self.dbrequest.sqlFillQtWidget(type_options, edit_widget)
             edit_widget.setEditText(value)
 
+        elif type_widget == "selected_item":
+            if type_options != "geom":
+                edit_widget = QLabel(tr(u"Attribute of selected feature") + " : " + type_options)
+            else:
+                edit_widget = QLabel(tr(u"Geometry of selected feature"))
+
         grid.addWidget(edit_widget, row_number, 1)
         return edit_widget
 
@@ -130,6 +142,8 @@ class QueryParamDialog(QDialog, FORM_CLASS):
 
                 # update value param
 
+                # print "DEBUG query_param TYPE = " + type_widget
+
                 if type_widget == "text":
                     param["value"] = widget.text()
 
@@ -139,6 +153,32 @@ class QueryParamDialog(QDialog, FORM_CLASS):
                 elif type_widget == "select":
                     param["value"] = widget.currentText()
 
+                # selected item : try to read the attribute of a selected item on map
+                elif type_widget == "selected_item":
+
+                    print "DEBUG query_param "
+                    currentLayer = self.iface.mapCanvas().currentLayer()
+                    if not type(currentLayer) is QgsVectorLayer:
+                        self.errorMessage = tr(u"Select a vector layer !")
+                        continue
+                    if currentLayer.selectedFeatureCount() != 1:
+                        self.errorMessage = tr(u"Select just one feature on map !")
+                        continue
+                    currentFeature = currentLayer.selectedFeatures()[0]
+
+                    # standard attribute :
+                    if type_options != "geom":
+
+                        if currentFeature.fields().indexFromName(type_options) == -1:
+                            self.errorMessage = tr(u"This feature does not have such an attribute : ") + type_options
+                            continue
+                        param["value"] = unicode(currentFeature.attribute(type_options))
+
+                    # geom attribut :
+                    else:
+                        param["value"] = "ST_GeomFromEWKT('SRID=" + str(currentLayer.crs().postgisSrid()) + ";" \
+                                         + currentFeature.geometry().exportToWkt() + "')"
+
 
 # return the type of parameter
 def splitParamNameAndType(paramName):
@@ -147,17 +187,21 @@ def splitParamNameAndType(paramName):
     type_options = ""
     name = paramName
 
-    for possible_type in ["text", "date", "select"]:
+    for possible_type in ["text", "date", "select", "selected_item"]:
         searched = possible_type + " "
         i = paramName.strip().find(searched)
         if i == 0:
             type_widget = possible_type
 
-            # type options
-            if possible_type == "select":
-                i_end_select = paramName.strip().find(";")
-                type_options = paramName.strip()[:i_end_select]
+            # type options ( for type with : mytype myoptions; )
+            if possible_type == "select" or possible_type == "selected_item":
+                i_end_type_with_option = paramName.strip().find(";")
+                type_options = paramName.strip()[:i_end_type_with_option]
                 searched = type_options + ";"
+
+            # remove type name from option (return myoptions istead of mytype myoptions)
+            if possible_type == "selected_item":
+                type_options = type_options[len(possible_type + " "):].strip()
 
             name = paramName.strip()[len(searched):].strip()
 

@@ -29,6 +29,7 @@ from PyQt4.QtGui import QStandardItem, QIcon, QAction, QComboBox, QSizePolicy, \
     QStandardItemModel, QTreeView, QPushButton, QHBoxLayout, QDialog, QApplication
 
 from qgis.gui import QgsMessageBar
+from qgis.core import QgsMessageLog
 
 # Initialize Qt resources from file resources.py
 import resources
@@ -392,8 +393,14 @@ class SharedSqlQueries:
         dialog = QueryParamDialog(self.iface, self.dbrequest, query, self.toolbar)
         if dialog.exec_() == QDialog.Accepted:
 
+            if dialog.errorMessage != "":
+                self.errorMessage(dialog.errorMessage)
+                return
+
             # format query as a Qgis readable sql source
             sql = query.updateFinalSql()
+
+            QgsMessageLog.logMessage(sql, "SharedSql", QgsMessageLog.INFO)
 
             # add the corresponding layer
             try:
