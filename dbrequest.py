@@ -204,6 +204,10 @@ def addLayer(layer):
 
     # add layer to registry and affect same layer variable to the result,
     # to be sure it had been correctly added (None result if not)
+
+    # before adding layer, ensure that it will be put on the top of all layers
+    QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint(QgsProject.instance().layerTreeRoot(), 0)
+
     layer = QgsMapLayerRegistry.instance().addMapLayer(layer, True)
 
     return layer

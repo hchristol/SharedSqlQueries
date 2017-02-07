@@ -1,4 +1,5 @@
 
+
 Done :
 - query with a selected geometry or feature
 - add a parameter type for richer types : date, select
