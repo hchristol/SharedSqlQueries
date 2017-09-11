@@ -5,11 +5,16 @@
 from codecs import open
 import os.path
 from translate import tr
+import re # regular expression
 
 # Tag for parameters
 TAG = "##"
 # inner Tag for parameters
 SEP = " : "
+# regex comment block search : match block comments
+COMMENT_BLOCK_PATTERN = '(?<=\/\*)((?:|.|\n|\r)*)(?=\*\/)'
+# regex comment line search : match lines comments
+COMMENT_LINE_PATTERN = '--.*(\n|\r)'
 
 # default values for header
 # gid : name of column integer id
@@ -58,28 +63,35 @@ class CustomSqlQuery:
 
 # extract first /* */ comment at the beginning of the file, and return sql without this header
 def extractHeader(sql):
-    header = None
 
-    # split header and the rest of sql
-    exploded = sql.replace("*/", "/*").split("/*")
+    search_comment = re.findall(COMMENT_BLOCK_PATTERN, sql)
 
-    if len(exploded) == 1:
+    print search_comment
+
+    if len(search_comment) == 0:
         # no header in the file
-        return [None, sql]
+        return [None, sqlCommentIgnored(sql)]
+
+    header_string = search_comment[0]
 
     # header just at the start of the file
-    if len(exploded) == 2:
-        header_string = exploded[0]
-        sql_after_header = exploded[1]
+    # if len(exploded) == 2:
+    #     header_string = exploded[0]
+    #     sql_after_header = sqlCommentIgnored(exploded[1])
+    #
+    # #...or header after empty lines :
+    # if len(exploded) > 2:
+    #     header_string = exploded[1]
+    #     # add to sql
+    #     sql_after_header=""
+    #     for i in range(2, len(exploded), 2):
+    #         sql_after_header += " " + sqlCommentIgnored(exploded[i])
 
-    #...or header after empty lines :
-    if len(exploded) > 2:
-        header_string = exploded[1]
-        sql_after_header = exploded[2]
+    # print "sql_after_header = " + sql_after_header
 
-    #print "extractHeader" + header_string
+    print "extractHeader : " + header_string
     header = extractCustomParameters(header_string)
-    return [header, sql_after_header]
+    return [header, sqlCommentIgnored(sql)]
 
 
 
@@ -90,6 +102,9 @@ def extractCustomParameters(sql):
     # split sql to extract parameters
     exploded = sql.split(TAG)
     count = 0
+
+    # print "extractCustomParameters"
+    # print exploded
 
     for block in exploded:
 
@@ -189,3 +204,7 @@ def value(param, defaultValue = None):
     if "default" in param:
         return param["default"]
     return defaultValue
+
+def sqlCommentIgnored(sql):
+    without_block_comment = re.sub(COMMENT_BLOCK_PATTERN, "", sql)
+    return re.sub(COMMENT_LINE_PATTERN, "", without_block_comment)
