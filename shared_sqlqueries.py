@@ -389,9 +389,9 @@ class SharedSqlQueries:
             self.errorMessage(str(e))
             return
 
-        # open param dialog
-        dialog = QueryParamDialog(self.iface, self.dbrequest, query, self.toolbar)
-        if dialog.exec_() == QDialog.Accepted:
+
+        # dialog parameter accepted
+        def DialogAccepted():
 
             if dialog.errorMessage != "":
                 self.errorMessage(dialog.errorMessage)
@@ -470,6 +470,13 @@ class SharedSqlQueries:
             # if there's a qml style file corresponding to the query, apply it to the newly added layer
             if os.path.exists(query.styleFilePath()):
                 layer.loadNamedStyle(query.styleFilePath())
+
+
+        # open parameter dialog
+        dialog = QueryParamDialog(self.iface, self.dbrequest, query, self.toolbar)
+        dialog.buttonBox.accepted.connect(DialogAccepted)
+        dialog.setModal(False)
+        dialog.show()
 
 
 # change width of widget to make it visible (or not)  in toolbar

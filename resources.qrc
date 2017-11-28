@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/plugins/SharedSqlQueries" >
         <file>icon.png</file>
+        <file>resources/createpoint.svg</file>
     </qresource>
 </RCC>

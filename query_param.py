@@ -1,12 +1,15 @@
 ﻿import os
 from PyQt4.uic import loadUiType
-from PyQt4.QtGui import QDialog, QLabel, QLineEdit, QDateEdit, QComboBox
+from PyQt4.QtGui import QDialog, QLabel, QLineEdit, QDateEdit, QComboBox, QToolBar, QAction, QIcon
+from PyQt4.QtCore import Qt, QObject, SIGNAL
 
 from qgis.gui import QgsMapCanvas
 from qgis.core import QgsVectorLayer
 
 from customSqlQuery import CustomSqlQuery
 from translate import tr
+
+from tools import tools_points
 
 FORM_CLASS, _ = loadUiType(os.path.join(
     os.path.dirname(__file__), 'query_param.ui'))
@@ -42,7 +45,14 @@ class QueryParamDialog(QDialog, FORM_CLASS):
 
         self.buttonBox.accepted.connect(self.DialogToParametersUpdate)
 
-    # dialog init
+        # edit geom button
+        self.mToolbar = QToolBar() # self.widget.addToolBar(self.widget.mPluggin_name)
+        self.mToolbar.setMinimumSize(100, 40)
+        self.mToolbar.setOrientation(Qt.Horizontal)
+        self.tools = None # array of tools to be used to edit a potential custom geometry parameter
+        self.editedGeom = None # current edited geometry
+
+        # dialog init
     def showEvent(self, evnt):
         super(QueryParamDialog, self).showEvent(evnt)
         self.ParametersToDialogUpdate()
@@ -119,8 +129,46 @@ class QueryParamDialog(QDialog, FORM_CLASS):
             else:
                 edit_widget = QLabel(tr(u"Geometry of selected feature"))
 
+        elif type_widget == "edited_geom":
+            if type_options == "point":
+                # geometry required
+                self.mToolbar.setVisible(True)
+                self.CreateEditingTools()
+                edit_widget = self.mToolbar
+
         grid.addWidget(edit_widget, row_number, 1)
         return edit_widget
+
+    # create tools for editing geometry
+    def CreateEditingTools(self):
+
+        self.tools = []
+        idtool_point = len(self.tools)
+        tool = tools_points.CreatePointTool(self.iface.mapCanvas())
+        self.tools.append(tool)
+
+        def geometryEdited(geom):
+            self.editedGeom=geom
+            activateTool(False) # end editing
+
+        def activateTool(state):
+            tool = self.tools[idtool_point]
+            ActivateTool(self.iface.mapCanvas(), tool, state, self.tools)
+
+            # edit event
+            QObject.disconnect(tool, SIGNAL("evInit(QgsGeometry*)"), geometryEdited)
+            if state:
+                QObject.connect(tool, SIGNAL("evInit(QgsGeometry*)"), geometryEdited)
+#            else:
+#                self.editedGeom=None
+
+
+        # Création du bouton et ajout du bouton à la toolbar
+        self.mToolbar.addAction(
+            CreateAction(self.iface, activateTool, self.tools[idtool_point] , \
+                tr(u"Click a point on map"), u":/plugins/SharedSqlQueries/resources/createpoint.svg")
+        )
+
 
     # update parameters of query
     def DialogToParametersUpdate(self):
@@ -142,8 +190,6 @@ class QueryParamDialog(QDialog, FORM_CLASS):
 
                 # update value param
 
-                # print "DEBUG query_param TYPE = " + type_widget
-
                 if type_widget == "text":
                     param["value"] = widget.text()
 
@@ -156,7 +202,6 @@ class QueryParamDialog(QDialog, FORM_CLASS):
                 # selected item : try to read the attribute of a selected item on map
                 elif type_widget == "selected_item":
 
-                    print "DEBUG query_param "
                     currentLayer = self.iface.mapCanvas().currentLayer()
                     if not type(currentLayer) is QgsVectorLayer:
                         self.errorMessage = tr(u"Select a vector layer !")
@@ -176,8 +221,16 @@ class QueryParamDialog(QDialog, FORM_CLASS):
 
                     # geom attribut :
                     else:
+                        geom = currentFeature.geometry()
+
                         param["value"] = "ST_GeomFromEWKT('SRID=" + str(currentLayer.crs().postgisSrid()) + ";" \
-                                         + currentFeature.geometry().exportToWkt() + "')"
+                                         + geom.exportToWkt() + "')"
+
+                # selected item : try to read the attribute of a selected item on map
+                elif type_widget == "edited_geom":
+                    geom = self.editedGeom
+                    param["value"] = "ST_GeomFromEWKT('SRID=" + str(self.iface.mapCanvas().mapSettings().destinationCrs().postgisSrid()) + ";" \
+                                 + geom.exportToWkt() + "')"
 
 
 # return the type of parameter
@@ -187,20 +240,20 @@ def splitParamNameAndType(paramName):
     type_options = ""
     name = paramName
 
-    for possible_type in ["text", "date", "select", "selected_item"]:
+    for possible_type in ["text", "date", "select", "selected_item", "edited_geom"]:
         searched = possible_type + " "
         i = paramName.strip().find(searched)
         if i == 0:
             type_widget = possible_type
 
             # type options ( for type with : mytype myoptions; )
-            if possible_type == "select" or possible_type == "selected_item":
+            if possible_type == "select" or possible_type == "selected_item" or possible_type == "edited_geom" :
                 i_end_type_with_option = paramName.strip().find(";")
                 type_options = paramName.strip()[:i_end_type_with_option]
                 searched = type_options + ";"
 
             # remove type name from option (return myoptions istead of mytype myoptions)
-            if possible_type == "selected_item":
+            if possible_type == "selected_item" or possible_type == "edited_geom":
                 type_options = type_options[len(possible_type + " "):].strip()
 
             name = paramName.strip()[len(searched):].strip()
@@ -208,3 +261,39 @@ def splitParamNameAndType(paramName):
             return [type_widget, type_options, name]
 
     return [type_widget, type_options, name]
+
+# create an action related to a given QgsMapTool tool
+def CreateAction(iface, fct_action, tool, tooltip, icone):
+
+    action = QAction(
+        QIcon(icone),
+        tooltip, iface.mainWindow())
+    action.toggled.connect(fct_action)
+    action.setCheckable(True)
+    if tool != None:
+        tool.setAction(action)
+    return action
+
+# activate or desactivate a QgsMapTool tool
+def ActivateTool(canvas, tool, etat, otherTools = None):
+
+    # En fonction du nouvel état j'active ou non l'outil correspondant
+    if etat:
+        if tool.action().isVisible():
+            canvas.setMapTool(tool)
+        else: #desactive outil s'il n'est pas visible
+            canvas.unsetMapTool(tool)
+            tool.deactivate()
+            tool.action().setChecked(False)
+
+        # others tools to be desactivated ?
+        if otherTools is not None :
+            for otherTool in otherTools:
+                if (otherTool != tool):
+                    canvas.unsetMapTool(otherTool)
+                    otherTool.action().setChecked(False)
+                    otherTool.deactivate()
+    else:
+        canvas.unsetMapTool(tool)
+        tool.deactivate()
+        tool.action().setChecked(False)

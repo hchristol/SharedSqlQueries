@@ -93,6 +93,15 @@ Type of parameters :
 ```
     Your query must end with a **;** to split it from the rest of your parameter description.
     *Important* : If specific attribute "geom" is given, then the geom of the entity will be used in request (the ST_GeomFromEWKT will be used automaticaly to transform geometry from Qgis geometry to sql)
+	
+```sql
+... AND geom = ## selected_item geom; Geometry of selected feature : ##
+```
+	
+* **edited_geom** : display a tool to edit a geometry on map. You have to specify the type of geometry you want (point, line, polygon).
+```sql
+... AND geom = ## edited_geom point; Click a point on map : ##
+```
 
 
 # Forbidden characters
