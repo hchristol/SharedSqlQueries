@@ -1,9 +1,9 @@
 ﻿import os
 from PyQt4.uic import loadUiType
-from PyQt4.QtGui import QDialog, QLabel, QLineEdit, QDateEdit, QComboBox, QToolBar, QAction, QIcon
+from PyQt4.QtGui import QDialog, QLabel, QLineEdit, QDateEdit, QComboBox, QToolBar, QAction, QIcon, QColor
 from PyQt4.QtCore import Qt, QObject, SIGNAL
 
-from qgis.gui import QgsMapCanvas
+from qgis.gui import QgsMapCanvas, QgsRubberBand
 from qgis.core import QgsVectorLayer
 
 from customSqlQuery import CustomSqlQuery
@@ -51,6 +51,12 @@ class QueryParamDialog(QDialog, FORM_CLASS):
         self.mToolbar.setOrientation(Qt.Horizontal)
         self.tools = None # array of tools to be used to edit a potential custom geometry parameter
         self.editedGeom = None # current edited geometry
+
+        # rubber to display edited geom after it has been validated
+        self.mRb = QgsRubberBand(self.iface.mapCanvas(), True)
+        self.mRb.setColor(QColor(255, 20, 20, 200))
+        self.mRb.setWidth(5)
+
 
         # dialog init
     def showEvent(self, evnt):
@@ -130,29 +136,43 @@ class QueryParamDialog(QDialog, FORM_CLASS):
                 edit_widget = QLabel(tr(u"Geometry of selected feature"))
 
         elif type_widget == "edited_geom":
-            if type_options == "point":
-                # geometry required
-                self.mToolbar.setVisible(True)
-                self.CreateEditingTools()
-                edit_widget = self.mToolbar
+            # geometry required
+            self.mToolbar.setVisible(True)
+            edit_widget = self.mToolbar
+            self.tools = []
+
+            if type_options.rfind("point")>=0:
+                self.CreateEditingTool(tools_points.CreatePointTool(self.iface.mapCanvas()),
+                                       tr(u"Click a point on map"),
+                                       u":/plugins/SharedSqlQueries/resources/createpoint.svg")
+
+            if type_options.rfind("line")>=0:
+                self.CreateEditingTool(tools_points.CreateLineTool(self.iface.mapCanvas()),
+                                       tr(u"CLick a line on map"),
+                                       u":/plugins/SharedSqlQueries/resources/createline.svg")
+
+            if type_options.rfind("polygon")>=0:
+                self.CreateEditingTool(tools_points.CreatePolygonTool(self.iface.mapCanvas()),
+                                       tr(u"CLick a line on map"),
+                                       u":/plugins/SharedSqlQueries/resources/createpolygon.svg")
+
 
         grid.addWidget(edit_widget, row_number, 1)
         return edit_widget
 
     # create tools for editing geometry
-    def CreateEditingTools(self):
+    def CreateEditingTool(self, tool, tooltip, svg):
 
-        self.tools = []
-        idtool_point = len(self.tools)
-        tool = tools_points.CreatePointTool(self.iface.mapCanvas())
+        idtool = len(self.tools)
         self.tools.append(tool)
 
         def geometryEdited(geom):
             self.editedGeom=geom
             activateTool(False) # end editing
+            self.mRb.setToGeometry(geom, None)
 
         def activateTool(state):
-            tool = self.tools[idtool_point]
+            tool = self.tools[idtool]
             ActivateTool(self.iface.mapCanvas(), tool, state, self.tools)
 
             # edit event
@@ -162,11 +182,10 @@ class QueryParamDialog(QDialog, FORM_CLASS):
 #            else:
 #                self.editedGeom=None
 
-
         # Création du bouton et ajout du bouton à la toolbar
         self.mToolbar.addAction(
-            CreateAction(self.iface, activateTool, self.tools[idtool_point] , \
-                tr(u"Click a point on map"), u":/plugins/SharedSqlQueries/resources/createpoint.svg")
+            CreateAction(self.iface, activateTool, self.tools[idtool] , \
+                tooltip, svg)
         )
 
 

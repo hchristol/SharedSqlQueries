@@ -467,6 +467,9 @@ class SharedSqlQueries:
                 print makeSqlValidForLayer(sql)
                 return
 
+            # once validated, clear rubber for edited geom
+            dialog.mRb.reset()
+
             # if there's a qml style file corresponding to the query, apply it to the newly added layer
             if os.path.exists(query.styleFilePath()):
                 layer.loadNamedStyle(query.styleFilePath())

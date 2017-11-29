@@ -98,9 +98,9 @@ Type of parameters :
 ... AND geom = ## selected_item geom; Geometry of selected feature : ##
 ```
 	
-* **edited_geom** : display a tool to edit a geometry on map. You have to specify the type of geometry you want (point, line, polygon).
+* **edited_geom** : display a tool to edit a geometry on map. You have to specify the type of geometry you want (point, line, polygon, use "&" to allow several types) :
 ```sql
-... AND geom = ## edited_geom point; Click a point on map : ##
+	SELECT row_number() over() as gid, ST_Buffer(## edited_geom point&line&polygon; Edit a point or a line or a polygon on map : ##, 100) as geom;
 ```
 
 
