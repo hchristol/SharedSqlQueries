@@ -87,7 +87,9 @@ class CreatePointTool(QgsMapTool):
         y = event.pos().y()        
         pos = self.mCanvas.getCoordinateTransform().toMapCoordinates(x, y)
 
+
         newGeom = QgsGeometry().fromPoint(pos)
+        self.mRb.reset(True)
         self.mRb.setToGeometry(newGeom, None)
 
         #HC emet feature crée avant sa validation pour pouvoir renseigner attributs par défaut, notamment l'identifiant
@@ -101,7 +103,7 @@ class CreatePointTool(QgsMapTool):
   
     def deactivate(self):
         if self.mRb:
-            # self.mRb.reset(True)
+            self.mRb.reset(True)
             self.mRb = None
         if self != None:
             self.emit(SIGNAL("evDeactivated(PyQt_PyObject)"), self)
