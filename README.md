@@ -114,6 +114,9 @@ If Qgis crashes, it's probably because your query does not have the required fie
 # Query with no geom column
 At the moment, it works only with **layer storage** : source
 
+# Other query
+UPDATE, INSERT AND DELETE query can be performed. No layer name is required.
+
 # QML associated files
 You can create a qml file (layer style file for Qgis) whose name is the name of the query file.
 If so, after loading sql layer, this style will be applied to the newly added layer.

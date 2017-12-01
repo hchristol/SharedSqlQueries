@@ -34,6 +34,9 @@ class Connection:
 
     # perform sql command and return data : [header, data, rowCount]
     def sqlExec(self, sql):
+
+        sql = makeSqlValidForLayer(sql)
+
         # Execute a SQL query and, return [header, data, rowCount]
         connector = PostGisDBConnector(self.uri)
 
@@ -44,7 +47,7 @@ class Connection:
             data = []
             header = connector._get_cursor_columns(c)
         except:
-            print "Erreur SQL : " + str(sql)  # debug purpose
+            print "Erreur SQL : " + unicode(sql)  # debug purpose
             raise
 
         if header is None:

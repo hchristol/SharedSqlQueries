@@ -39,7 +39,9 @@ translation_fr = {
     u"Geometry of selected feature":
         u"Géométrie de l'entité sélectionnée",
     u"Click a point on map":
-        u"Cliquez dans la carte pour saisir un point"
+        u"Cliquez dans la carte pour saisir un point",
+    u"Request performed":
+        u"Requête exécutée"
 }
 
 

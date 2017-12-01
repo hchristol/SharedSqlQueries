@@ -339,6 +339,10 @@ class SharedSqlQueries:
     def errorMessage(self, message):
         self.iface.messageBar().pushMessage(self.tr(u"Error"), message, level=QgsMessageBar.CRITICAL)
 
+    #display an error
+    def infoMessage(self, message):
+        self.iface.messageBar().pushMessage(self.tr(u"Info"), message, level=QgsMessageBar.INFO)
+
     #read file in query folder and show them in combo tree view
     def updateComboQueries(self):
         self.queriesModel.clear()
@@ -402,77 +406,107 @@ class SharedSqlQueries:
 
             QgsMessageLog.logMessage(sql, "SharedSql", QgsMessageLog.INFO)
 
-            # add the corresponding layer
-            try:
+            # type of request :
+            firstword = "" # first word of request : select, update, insert, delete
+            i = 1000
 
-                # save query in a memory layer
-                if query.headerValue("layer storage") == "memory":
-                    layer = self.dbrequest.sqlAddMemoryLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
+            for word in ["select", "update", "insert", "delete"]:
+                i2 = sql.lower().find(word)
+                if i2 > 0 and i2 < i: # pick the first signifiant word
+                    firstword = word
+                    i = i2
 
-                # save query directly as a sql layer
-                elif query.headerValue("layer storage") == "source":
-                    layer = self.dbrequest.sqlAddLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
+            if firstword == "" :
+                self.errorMessage("Unrecognized query, please use only select, update, insert or delete query")
+                return
 
-                # save query in a file layer
-                else:
-                    type = query.headerValue("layer storage").lower()
-                    driver = None
-                    if type == "geojson":
-                        driver = "GeoJSON"
-                    if type == "shp":
-                        driver = "ESRI Shapefile"
+            if firstword == "select":
+                # add the corresponding layer
+                try:
 
-                    if driver is None:
-                        self.errorMessage(self.tr(u"Unknown file type : ") + str(type))
-                        return
+                    # save query in a memory layer
+                    if query.headerValue("layer storage") == "memory":
+                        layer = self.dbrequest.sqlAddMemoryLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
 
-                    directory = query.headerValue("layer directory")
-                    if directory is None:
-                        self.errorMessage(self.tr(u"No layer directory parameter found in query !"))
-                        return
-                    name = query.headerValue("layer name")
+                    # save query directly as a sql layer
+                    elif query.headerValue("layer storage") == "source":
+                        layer = self.dbrequest.sqlAddLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
 
-                    # new layer name and file name if file already exists
-                    filepath = directory + "/" + name + "." + type
-                    filecount = 1
-                    new_name = name
-                    while os.path.exists(filepath):
-                        # file already exists
-                        filecount += 1
-                        new_name = name + "_" + str(filecount)
-                        filepath = directory + "/" + new_name + "." + type
-                    name = new_name
+                    # save query in a file layer
+                    else:
+                        type = query.headerValue("layer storage").lower()
+                        driver = None
+                        if type == "geojson":
+                            driver = "GeoJSON"
+                        if type == "shp":
+                            driver = "ESRI Shapefile"
+
+                        if driver is None:
+                            self.errorMessage(self.tr(u"Unknown file type : ") + str(type))
+                            return
+
+                        directory = query.headerValue("layer directory")
+                        if directory is None:
+                            self.errorMessage(self.tr(u"No layer directory parameter found in query !"))
+                            return
+                        name = query.headerValue("layer name")
+
+                        # new layer name and file name if file already exists
+                        filepath = directory + "/" + name + "." + type
+                        filecount = 1
+                        new_name = name
+                        while os.path.exists(filepath):
+                            # file already exists
+                            filecount += 1
+                            new_name = name + "_" + str(filecount)
+                            filepath = directory + "/" + new_name + "." + type
+                        name = new_name
 
 
-                    #wait cursor
-                    QApplication.setOverrideCursor(Qt.WaitCursor)
+                        #wait cursor
+                        QApplication.setOverrideCursor(Qt.WaitCursor)
 
-                    # add new layer
-                    layer = self.dbrequest.sqlAddFileLayer(sql, driver, filepath, name,
-                                    query.headerValue("gid"), query.headerValue("geom"))
+                        # add new layer
+                        layer = self.dbrequest.sqlAddFileLayer(sql, driver, filepath, name,
+                                        query.headerValue("gid"), query.headerValue("geom"))
 
+                        QApplication.setOverrideCursor(Qt.ArrowCursor)
+
+
+
+                except SyntaxError as e:
                     QApplication.setOverrideCursor(Qt.ArrowCursor)
+                    # sql is correct but does not fit QGIS requirement (like '%' char)
+                    self.errorMessage(self.tr(e.text))
+                    return
+
+                if layer is None:
+                    self.errorMessage(self.tr(u"Unable to add a layer corresponding to this query !") + sql)
+                    # sql which is used in layer query
+                    print makeSqlValidForLayer(sql)
+                    return
+
+                # if there's a qml style file corresponding to the query, apply it to the newly added layer
+                if os.path.exists(query.styleFilePath()):
+                    layer.loadNamedStyle(query.styleFilePath())
 
 
+            print firstword
 
-            except SyntaxError as e:
-                QApplication.setOverrideCursor(Qt.ArrowCursor)
-                # sql is correct but does not fit QGIS requirement (like '%' char)
-                self.errorMessage(self.tr(e.text))
-                return
+            if firstword == "update" or firstword == "insert" or firstword == "delete":
+                try:
+                    self.dbrequest.sqlExec(sql)
+                    self.infoMessage(self.tr(u"Request performed"))
 
-            if layer is None:
-                self.errorMessage(self.tr(u"Unable to add a layer corresponding to this query !") + sql)
-                # sql which is used in layer query
-                print makeSqlValidForLayer(sql)
-                return
+                except SyntaxError as e:
+                    QApplication.setOverrideCursor(Qt.ArrowCursor)
+                    # sql is correct but does not fit QGIS requirement (like '%' char)
+                    self.errorMessage(self.tr(e.text))
+                    return
 
             # once validated, clear rubber for edited geom
             dialog.mRb.reset()
 
-            # if there's a qml style file corresponding to the query, apply it to the newly added layer
-            if os.path.exists(query.styleFilePath()):
-                layer.loadNamedStyle(query.styleFilePath())
 
 
         # open parameter dialog
