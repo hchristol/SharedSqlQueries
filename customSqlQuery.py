@@ -23,11 +23,15 @@ COMMENT_LINE_PATTERN = '--.*(\n|\r)'
 # layer storage : type of storage for this layer :
 #       - source (sql query is directly the data source, memory
 #       - memory : copy in memory of the sql query
+# result as : how to display result (these options are cumulative) :
+#       - layer : result shown as a new layer (default value. If not choosen, the other layer name and layer storage option are ignored)
+#       - list : result shown in a list widget. result can be exported in xls file
 DEFAULT_HEADER_VALUE = {
     'gid': {"value": 'gid'},
     'geom': {"value": 'geom'},
     'layer name': {"value": tr('My Request')},
-    'layer storage': {"value": "source"}
+    'layer storage': {"value": "source"},
+    'result as': {"value": "layer"}
 }
 
 class CustomSqlQuery:

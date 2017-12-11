@@ -24,6 +24,8 @@
 import glob
 import os.path
 
+from PyQt4 import uic
+
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QStandardItem, QIcon, QAction, QComboBox, QSizePolicy, \
     QStandardItemModel, QTreeView, QPushButton, QHBoxLayout, QDialog, QApplication
@@ -424,55 +426,75 @@ class SharedSqlQueries:
                 # add the corresponding layer
                 try:
 
-                    # save query in a memory layer
-                    if query.headerValue("layer storage") == "memory":
-                        layer = self.dbrequest.sqlAddMemoryLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
+                    # wait cursor
+                    QApplication.setOverrideCursor(Qt.WaitCursor)
 
-                    # save query directly as a sql layer
-                    elif query.headerValue("layer storage") == "source":
-                        layer = self.dbrequest.sqlAddLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
+                    # add new layer if required :
+                    if 'layer' in query.headerValue("result as"):
 
-                    # save query in a file layer
-                    else:
-                        type = query.headerValue("layer storage").lower()
-                        driver = None
-                        if type == "geojson":
-                            driver = "GeoJSON"
-                        if type == "shp":
-                            driver = "ESRI Shapefile"
+                        # save query in a memory layer
+                        if query.headerValue("layer storage") == "memory":
+                            layer = self.dbrequest.sqlAddMemoryLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
 
-                        if driver is None:
-                            self.errorMessage(self.tr(u"Unknown file type : ") + str(type))
-                            return
+                        # save query directly as a sql layer
+                        elif query.headerValue("layer storage") == "source":
+                            layer = self.dbrequest.sqlAddLayer(sql, query.headerValue("layer name"), query.headerValue("gid"), query.headerValue("geom"))
 
-                        directory = query.headerValue("layer directory")
-                        if directory is None:
-                            self.errorMessage(self.tr(u"No layer directory parameter found in query !"))
-                            return
-                        name = query.headerValue("layer name")
+                        # save query in a file layer
+                        else:
+                            type = query.headerValue("layer storage").lower()
+                            driver = None
+                            if type == "geojson":
+                                driver = "GeoJSON"
+                            if type == "shp":
+                                driver = "ESRI Shapefile"
 
-                        # new layer name and file name if file already exists
-                        filepath = directory + "/" + name + "." + type
-                        filecount = 1
-                        new_name = name
-                        while os.path.exists(filepath):
-                            # file already exists
-                            filecount += 1
-                            new_name = name + "_" + str(filecount)
-                            filepath = directory + "/" + new_name + "." + type
-                        name = new_name
+                            if driver is None:
+                                QApplication.setOverrideCursor(Qt.ArrowCursor)
+                                self.errorMessage(self.tr(u"Unknown file type : ") + str(type))
+                                return
 
+                            directory = query.headerValue("layer directory")
+                            if directory is None:
+                                QApplication.setOverrideCursor(Qt.ArrowCursor)
+                                self.errorMessage(self.tr(u"No layer directory parameter found in query !"))
+                                return
+                            name = query.headerValue("layer name")
 
-                        #wait cursor
-                        QApplication.setOverrideCursor(Qt.WaitCursor)
-
-                        # add new layer
-                        layer = self.dbrequest.sqlAddFileLayer(sql, driver, filepath, name,
-                                        query.headerValue("gid"), query.headerValue("geom"))
-
-                        QApplication.setOverrideCursor(Qt.ArrowCursor)
+                            # new layer name and file name if file already exists
+                            filepath = directory + "/" + name + "." + type
+                            filecount = 1
+                            new_name = name
+                            while os.path.exists(filepath):
+                                # file already exists
+                                filecount += 1
+                                new_name = name + "_" + str(filecount)
+                                filepath = directory + "/" + new_name + "." + type
+                            name = new_name
 
 
+                            layer = self.dbrequest.sqlAddFileLayer(sql, driver, filepath, name,
+                                            query.headerValue("gid"), query.headerValue("geom"))
+
+                            if layer is None:
+                                QApplication.setOverrideCursor(Qt.ArrowCursor)
+                                self.errorMessage(self.tr(u"Unable to add a layer corresponding to this query !") + sql)
+                                # sql which is used in layer query
+                                print makeSqlValidForLayer(sql)
+                                return
+
+                            # if there's a qml style file corresponding to the query, apply it to the newly added layer
+                            if os.path.exists(query.styleFilePath()):
+                                layer.loadNamedStyle(query.styleFilePath())
+
+
+
+                    # optional list widget viewer for results :
+                    if 'list' in query.headerValue("result as"):
+                        # open a list data
+                        self.openListDialog(sql)
+
+                    QApplication.setOverrideCursor(Qt.ArrowCursor)
 
                 except SyntaxError as e:
                     QApplication.setOverrideCursor(Qt.ArrowCursor)
@@ -480,18 +502,8 @@ class SharedSqlQueries:
                     self.errorMessage(self.tr(e.text))
                     return
 
-                if layer is None:
-                    self.errorMessage(self.tr(u"Unable to add a layer corresponding to this query !") + sql)
-                    # sql which is used in layer query
-                    print makeSqlValidForLayer(sql)
-                    return
-
-                # if there's a qml style file corresponding to the query, apply it to the newly added layer
-                if os.path.exists(query.styleFilePath()):
-                    layer.loadNamedStyle(query.styleFilePath())
 
 
-            print firstword
 
             if firstword == "update" or firstword == "insert" or firstword == "delete":
                 try:
@@ -508,7 +520,6 @@ class SharedSqlQueries:
             dialog.mRb.reset()
 
 
-
         # open parameter dialog
         dialog = QueryParamDialog(self.iface, self.dbrequest, query, self.toolbar)
         dialog.buttonBox.accepted.connect(DialogAccepted)
@@ -516,7 +527,57 @@ class SharedSqlQueries:
         dialog.show()
 
 
+    # Open the optional dialog which displays a list widget of data and allow xls export
+    def openListDialog(self, sql):
+        dresult = listDialog(None)
+        dresult.setWindowTitle(translate.tr(u"Result"))
+        dresult.label_outputfile.setText(translate.tr(u"Output file :"))
+        dresult.pushButton_open_file.setText(translate.tr(u"Open"))
+        model = None
+
+        from tools import export
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        [header, data, rowCount] = self.dbrequest.sqlExec(sql)
+        QApplication.setOverrideCursor(Qt.ArrowCursor)
+
+        if rowCount > 0:
+            model = export.fillMultiColumnListWithData(dresult.list_queryresult, data, header)
+
+        def open_file():
+            filename = dresult.line_edit_file.text()
+            if model is not None:
+                export.exportQModeleToXls(filename, translate.tr(u"Result"), model, True)
+
+        dresult.setModal(True)
+        dresult.pushButton_open_file.clicked.connect(open_file)
+        dresult.exec_() # show does not work :-(
+
+
+
+
+
+
 # change width of widget to make it visible (or not)  in toolbar
 def setWidgetWidth(widget, minwidth, maxwidth):
     widget.setMinimumWidth(minwidth)
     widget.setMaximumWidth(maxwidth)
+
+
+# ressource dialog
+FORM_CLASS, _ = uic.loadUiType(os.path.join(
+    os.path.dirname(__file__), 'list_dialog.ui'))
+
+
+# dialog list showing result array
+class listDialog(QDialog, FORM_CLASS):
+    def __init__(self, parent=None):
+        """Constructor."""
+        super(listDialog, self).__init__(parent)
+        # Set up the user interface from Designer.
+        self.setupUi(self)
+
+        # initialisation de la boite de dialogue
+
+
+    def showEvent(self, evnt):
+        super(listDialog, self).showEvent(evnt)

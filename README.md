@@ -56,9 +56,10 @@ WHERE p.idsupport = s.idsupport
 
 # Header parameters
 Put header parameters in the comment block at the beginning of your request
+* **result as** : you can both display the result of a query as a layer or as a list widget that you can export as xls file. The default value for this parameter is *layer*. If you only want to view a list widget (array) of your result, replace this value by *list*. If you want both a layer and a list widget, type *layer,list*
 * **layer name** : name of the output layer (default : My Query)
 * **gid** : name of the required integer key column (default : gid).
-    ** WARNING ** : if your gid has duplicate values, Qgis will crash. Ensure your gid has unique values !
+    **WARNING** : if your gid has duplicate values, Qgis will crash. Ensure your gid has unique values !
     Use this gid if you don't know how to deal with duplicate gid :
    ```sql
    SELECT row_number() over() as gid, ...

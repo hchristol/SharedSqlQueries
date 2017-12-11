@@ -41,7 +41,9 @@ translation_fr = {
     u"Click a point on map":
         u"Cliquez dans la carte pour saisir un point",
     u"Request performed":
-        u"Requête exécutée"
+        u"Requête exécutée",
+    u"Result": u"Resultats",
+    u"Output file :": u"Fichier résultat :"
 }
 
 
