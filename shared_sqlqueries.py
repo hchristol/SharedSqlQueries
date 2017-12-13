@@ -380,9 +380,8 @@ class SharedSqlQueries:
 
     #run selected query
     def runQuery(self):
-        #print self.comboxQueries.currentText()
-        #print self.selectedQueryPath
 
+        # Open query file
         try:
             query = CustomSqlQuery(self.selectedQueryPath)
         except UnicodeDecodeError:
@@ -392,11 +391,11 @@ class SharedSqlQueries:
             self.errorMessage(e.text)
             return
         except Exception as e:
-            self.errorMessage(str(e))
+            self.errorMessage(unicode(e))
             return
 
 
-        # dialog parameter accepted
+        # dialog parameter of query accepted
         def DialogAccepted():
 
             if dialog.errorMessage != "":

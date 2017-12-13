@@ -78,26 +78,8 @@ def extractHeader(sql):
 
     header_string = search_comment[0]
 
-    # header just at the start of the file
-    # if len(exploded) == 2:
-    #     header_string = exploded[0]
-    #     sql_after_header = sqlCommentIgnored(exploded[1])
-    #
-    # #...or header after empty lines :
-    # if len(exploded) > 2:
-    #     header_string = exploded[1]
-    #     # add to sql
-    #     sql_after_header=""
-    #     for i in range(2, len(exploded), 2):
-    #         sql_after_header += " " + sqlCommentIgnored(exploded[i])
-
-    # print "sql_after_header = " + sql_after_header
-
-    print "extractHeader : " + header_string
     header = extractCustomParameters(header_string)
     return [header, sqlCommentIgnored(sql)]
-
-
 
 
 #return parameters read from an sql string
