@@ -88,8 +88,10 @@ def exportQModeleToXls(filename, titre, model, openfile = False):
     
     if openfile:
         try:
-            import os
-            os.system(filename)
+            # import os
+            import subprocess
+            # os.system(filename)
+            subprocess.call(filename, shell=True)
         except BaseException:
             raise IOError(u"File Error : unable to open " + filename)
 

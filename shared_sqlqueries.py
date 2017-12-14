@@ -475,23 +475,26 @@ class SharedSqlQueries:
                             layer = self.dbrequest.sqlAddFileLayer(sql, driver, filepath, name,
                                             query.headerValue("gid"), query.headerValue("geom"))
 
-                            if layer is None:
-                                QApplication.setOverrideCursor(Qt.ArrowCursor)
-                                self.errorMessage(self.tr(u"Unable to add a layer corresponding to this query !") + sql)
-                                # sql which is used in layer query
-                                print makeSqlValidForLayer(sql)
-                                return
 
-                            # if there's a qml style file corresponding to the query, apply it to the newly added layer
-                            if os.path.exists(query.styleFilePath()):
-                                layer.loadNamedStyle(query.styleFilePath())
+                        if layer is None:
+                            QApplication.setOverrideCursor(Qt.ArrowCursor)
+                            self.errorMessage(self.tr(u"Unable to add a layer corresponding to this query !") + sql)
+                            # sql which is used in layer query
+                            print makeSqlValidForLayer(sql)
+                            return
+
+                        # if there's a qml style file corresponding to the query, apply it to the newly added layer
+                        if os.path.exists(query.styleFilePath()):
+                            layer.loadNamedStyle(query.styleFilePath())
 
 
 
                     # optional list widget viewer for results :
                     if 'list' in query.headerValue("result as"):
                         # open a list data
-                        self.openListDialog(sql)
+                        self.openListDialog(sql,
+                                # default path
+                                (query.headerValue("layer directory")  + "/" + query.headerValue("layer name") + ".xls").replace(" ", "_"))
 
                     QApplication.setOverrideCursor(Qt.ArrowCursor)
 
@@ -527,11 +530,17 @@ class SharedSqlQueries:
 
 
     # Open the optional dialog which displays a list widget of data and allow xls export
-    def openListDialog(self, sql):
+    def openListDialog(self, sql, filepath):
+
+        # clean ascii file
+        # and  (remove blank spaces which cause failure while opening file)
+        filepath = remove_accent(filepath).replace(" ", "_")
+
         dresult = listDialog(None)
         dresult.setWindowTitle(translate.tr(u"Result"))
         dresult.label_outputfile.setText(translate.tr(u"Output file :"))
         dresult.pushButton_open_file.setText(translate.tr(u"Open"))
+        dresult.line_edit_file.setText(filepath)
         model = None
 
         from tools import export
@@ -543,9 +552,9 @@ class SharedSqlQueries:
             model = export.fillMultiColumnListWithData(dresult.list_queryresult, data, header)
 
         def open_file():
-            filename = dresult.line_edit_file.text()
+            finalfilepath = remove_accent(dresult.line_edit_file.text()).replace(" ", "_")
             if model is not None:
-                export.exportQModeleToXls(filename, translate.tr(u"Result"), model, True)
+                export.exportQModeleToXls(finalfilepath, translate.tr(u"Result"), model, True)
 
         dresult.setModal(True)
         dresult.pushButton_open_file.clicked.connect(open_file)
@@ -560,6 +569,12 @@ class SharedSqlQueries:
 def setWidgetWidth(widget, minwidth, maxwidth):
     widget.setMinimumWidth(minwidth)
     widget.setMaximumWidth(maxwidth)
+
+def remove_accent(text):
+    if type(text) is unicode:
+        import unicodedata
+        return unicodedata.normalize('NFD', text).encode('ascii', 'ignore')
+    return text # str type
 
 
 # ressource dialog
