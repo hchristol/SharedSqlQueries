@@ -491,10 +491,13 @@ class SharedSqlQueries:
 
                     # optional list widget viewer for results :
                     if 'list' in query.headerValue("result as"):
+                        savedirectory = query.headerValue("layer directory")
+                        if savedirectory is None:
+                            savedirectory = ""
                         # open a list data
                         self.openListDialog(sql,
                                 # default path
-                                (query.headerValue("layer directory")  + "/" + query.headerValue("layer name") + ".xls").replace(" ", "_"))
+                                (savedirectory  + "/" + query.headerValue("layer name") + ".xls").replace(" ", "_"))
 
                     QApplication.setOverrideCursor(Qt.ArrowCursor)
 
