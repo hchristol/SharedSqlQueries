@@ -76,11 +76,12 @@ def exportQModeleToXls(filename, titre, model, openfile = False):
                 # else:
                 value = item.text()
             try:
-                sh.write(row + 1, col, unicode(value))
+                sh.write(row + 1, col, try_convert_into_number(value))
+
             except Exception as e:
                 print u"ERROR line " + str(row) + " : " + e.message + u"   problem here : " + unicode(value)
     try:
-        # Ecriture du fichier
+        # write file
         book.save(filename)
     except BaseException as e:
         # Error
@@ -96,3 +97,13 @@ def exportQModeleToXls(filename, titre, model, openfile = False):
 
     return [True, book]
 
+
+# Try to convert a string into number, to have a proper type in xls export
+def try_convert_into_number(s):
+    try:
+        return long(s)
+    except ValueError:
+        try:
+            return float(s)
+        except ValueError:
+            return unicode(s)
