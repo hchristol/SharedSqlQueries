@@ -13,15 +13,15 @@ import os
 from db_manager.db_plugins.postgis.connector import PostGisDBConnector
 from qgis.core import *
 from qgis.core import QgsVectorFileWriter
-from PyQt4 import QtGui
-from PyQt4.QtCore import *
+from qgis.PyQt import QtGui
+from qgis.PyQt.QtCore import *
 
 class Connection(object):
     #param : list with host, port, dbname :
     def __init__(self, param):
         self.param = param
         #set connector property for the given database type and parameters
-        self.uri = QgsDataSourceURI()
+        self.uri = QgsDataSourceUri()
 
         user=""
         if 'user' in self.param: user=str(self.param['user'])
@@ -205,9 +205,9 @@ def makeSqlValidForLayer(sql, forbidenChar = []):
 def addLayer(layer):
 
     # Existing layer ?
-    layerList = QgsMapLayerRegistry.instance().mapLayersByName(layer.name())
+    layerList = QgsProject.instance().mapLayersByName(layer.name())
     if (len(layerList)>0):
-        QgsMapLayerRegistry.instance().removeMapLayer(layerList[0].id())
+        QgsProject.instance().removeMapLayer(layerList[0].id())
 
     # add layer to registry and affect same layer variable to the result,
     # to be sure it had been correctly added (None result if not)
@@ -215,6 +215,6 @@ def addLayer(layer):
     # before adding layer, ensure that it will be put on the top of all layers
     QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint(QgsProject.instance().layerTreeRoot(), 0)
 
-    layer = QgsMapLayerRegistry.instance().addMapLayer(layer, True)
+    layer = QgsProject.instance().addMapLayer(layer, True)
 
     return layer

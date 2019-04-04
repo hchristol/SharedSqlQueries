@@ -1,6 +1,6 @@
 ﻿# simple translation module (Qt Translator... no thanks)
 
-from PyQt4.QtCore import QSettings
+from qgis.PyQt.QtCore import QSettings
 
 # initialize locale
 locale = QSettings().value('locale/userLocale')[0:2]

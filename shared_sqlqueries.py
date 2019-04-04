@@ -28,10 +28,10 @@ from builtins import object
 import glob
 import os.path
 
-from PyQt4 import uic
+from qgis.PyQt import uic
 
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QStandardItem, QIcon, QAction, QComboBox, QSizePolicy, \
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QStandardItem, QIcon, QAction, QComboBox, QSizePolicy, \
     QStandardItemModel, QTreeView, QPushButton, QHBoxLayout, QDialog, QApplication
 
 from qgis.gui import QgsMessageBar
@@ -343,11 +343,11 @@ class SharedSqlQueries(object):
 
     #display an error
     def errorMessage(self, message):
-        self.iface.messageBar().pushMessage(self.tr(u"Error"), message, level=QgsMessageBar.CRITICAL)
+        self.iface.messageBar().pushMessage(self.tr(u"Error"), message, level=Qgis.Critical)
 
     #display an error
     def infoMessage(self, message):
-        self.iface.messageBar().pushMessage(self.tr(u"Info"), message, level=QgsMessageBar.INFO)
+        self.iface.messageBar().pushMessage(self.tr(u"Info"), message, level=Qgis.Info)
 
     #read file in query folder and show them in combo tree view
     def updateComboQueries(self):

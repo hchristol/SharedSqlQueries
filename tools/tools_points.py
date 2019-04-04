@@ -22,8 +22,8 @@
 """
 
 import math
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from qgis.PyQt.QtCore import *
+from qgis.PyQt.QtGui import *
 from qgis.core import *
 from qgis.gui import *
 
@@ -75,7 +75,7 @@ class CreatePointTool(QgsMapTool):
         y = event.pos().y()        
         pos = self.mCanvas.getCoordinateTransform().toMapCoordinates(x, y)
 
-        newGeom = QgsGeometry().fromPoint (pos)
+        newGeom = QgsGeometry().fromPointXY(pos)
 
         # draw it to rubber
         self.mRb.setToGeometry( newGeom, None )  
@@ -89,7 +89,7 @@ class CreatePointTool(QgsMapTool):
         pos = self.mCanvas.getCoordinateTransform().toMapCoordinates(x, y)
 
 
-        newGeom = QgsGeometry().fromPoint(pos)
+        newGeom = QgsGeometry().fromPointXY(pos)
         self.mRb.reset(True)
         self.mRb.setToGeometry(newGeom, None)
 
@@ -316,7 +316,7 @@ class CreatePolygonTool(QgsMapTool):
         # save geom
         self.mGeom = None
         if len(self.mPoints) >= 3:
-            self.mGeom = QgsGeometry().fromPolygon([self.mPoints])
+            self.mGeom = QgsGeometry().fromPolygonXY([self.mPoints])
 
         self.mRb1.reset(True)
         self.mRb2.reset(True)
@@ -328,7 +328,7 @@ class CreatePolygonTool(QgsMapTool):
         # Save geom
         self.mGeom = None
         if len(self.mPoints) > 1:
-            self.mGeom = QgsGeometry().fromPolygon([self.mPoints])
+            self.mGeom = QgsGeometry().fromPolygonXY([self.mPoints])
 
         # end editing event
         self.emit(SIGNAL("evInit(QgsGeometry*)"), self.mGeom)

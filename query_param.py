@@ -1,9 +1,9 @@
 ﻿from __future__ import absolute_import
 from builtins import str
 import os
-from PyQt4.uic import loadUiType
-from PyQt4.QtGui import QDialog, QLabel, QLineEdit, QDateEdit, QComboBox, QToolBar, QAction, QIcon, QColor
-from PyQt4.QtCore import Qt, QObject, SIGNAL
+from qgis.PyQt.uic import loadUiType
+from qgis.PyQt.QtGui import QDialog, QLabel, QLineEdit, QDateEdit, QComboBox, QToolBar, QAction, QIcon, QColor
+from qgis.PyQt.QtCore import Qt, QObject, SIGNAL
 
 from qgis.gui import QgsMapCanvas, QgsRubberBand
 from qgis.core import QgsVectorLayer
@@ -245,13 +245,13 @@ class QueryParamDialog(QDialog, FORM_CLASS):
                         geom = currentFeature.geometry()
 
                         param["value"] = "ST_GeomFromEWKT('SRID=" + str(currentLayer.crs().postgisSrid()) + ";" \
-                                         + geom.exportToWkt() + "')"
+                                         + geom.asWkt() + "')"
 
                 # selected item : try to read the attribute of a selected item on map
                 elif type_widget == "edited_geom":
                     geom = self.editedGeom
                     param["value"] = "ST_GeomFromEWKT('SRID=" + str(self.iface.mapCanvas().mapSettings().destinationCrs().postgisSrid()) + ";" \
-                                 + geom.exportToWkt() + "')"
+                                 + geom.asWkt() + "')"
 
 
 # return the type of parameter

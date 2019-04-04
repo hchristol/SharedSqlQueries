@@ -7,10 +7,10 @@ from builtins import range
 
 import os
 import PyQt4.Qt as qt 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4 import QtXml
+from qgis.PyQt import QtCore, QtGui
+from qgis.PyQt.QtCore import *
+from qgis.PyQt.QtGui import *
+from qgis.PyQt import QtXml
 from win32com.client import Dispatch
 from qgis.core import *
 import xlwt
