@@ -4,6 +4,10 @@
 connection to pg a database whose paramaters are read in json config
  ***************************************************************************/
 """
+from __future__ import print_function
+from builtins import chr
+from builtins import str
+from builtins import object
 
 import os
 from db_manager.db_plugins.postgis.connector import PostGisDBConnector
@@ -12,7 +16,7 @@ from qgis.core import QgsVectorFileWriter
 from PyQt4 import QtGui
 from PyQt4.QtCore import *
 
-class Connection:
+class Connection(object):
     #param : list with host, port, dbname :
     def __init__(self, param):
         self.param = param
@@ -20,14 +24,14 @@ class Connection:
         self.uri = QgsDataSourceURI()
 
         user=""
-        if self.param.has_key('user'): user=unicode(self.param['user'])
+        if 'user' in self.param: user=str(self.param['user'])
         pwd=""
-        if self.param.has_key('password'): pwd=unicode(self.param['password'])
+        if 'password' in self.param: pwd=str(self.param['password'])
 
         self.uri.setConnection(
-            unicode(self.param['host']),
-            unicode(self.param['port']),
-            unicode(self.param['dbname']),
+            str(self.param['host']),
+            str(self.param['port']),
+            str(self.param['dbname']),
             user,
             pwd
         )
@@ -43,11 +47,11 @@ class Connection:
         #print "DEBUG dbrequest : sql = " + sql
 
         try:
-            c = connector._execute(None, unicode(sql))
+            c = connector._execute(None, str(sql))
             data = []
             header = connector._get_cursor_columns(c)
         except:
-            print "Erreur SQL : " + unicode(sql)  # debug purpose
+            print("Erreur SQL : " + str(sql))  # debug purpose
             raise
 
         if header is None:
@@ -116,7 +120,7 @@ class Connection:
         if pg_layer.geometryType() > 2:
             exc = SyntaxError()
             exc.text = u"No geometry type found for memory layer ! Unable to load unknown geometry type !"
-            print sql
+            print(sql)
             raise exc
 
         memory_layer = QgsVectorLayer(['Point', 'MultiLineString', 'MultiPolygon'][pg_layer.geometryType()] +
@@ -181,7 +185,7 @@ class Connection:
 # transform sql so it can be loader as a layer data source
 def makeSqlValidForLayer(sql, forbidenChar = []):
     # remove utf8 header character :
-    sql = sql.replace(unichr(65279), '')
+    sql = sql.replace(chr(65279), '')
     # remove new line characters
     sql = sql.replace(chr(13), ' ').replace(chr(10), ' ').replace('\t', ' ')
     # remove ; and blanck at the end of sql

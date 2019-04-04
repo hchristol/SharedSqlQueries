@@ -1,10 +1,13 @@
-﻿# Sql query read in an sql file where custom parameters can be overriden
+﻿from __future__ import print_function
+from __future__ import absolute_import
+from builtins import object
+# Sql query read in an sql file where custom parameters can be overriden
 # example of parameter :  ##My Value : type : default value##
 # header info must be provided at the beginning of the file, in /* */
 
 from codecs import open
 import os.path
-from translate import tr
+from .translate import tr
 import re # regular expression
 
 # Tag for parameters
@@ -34,7 +37,7 @@ DEFAULT_HEADER_VALUE = {
     'result as': {"value": "layer"}
 }
 
-class CustomSqlQuery:
+class CustomSqlQuery(object):
 
     # read CustomSqlQuery from a given path to an sql file
     def __init__(self, path):
@@ -70,7 +73,7 @@ def extractHeader(sql):
 
     search_comment = re.findall(COMMENT_BLOCK_PATTERN, sql)
 
-    print search_comment
+    print(search_comment)
 
     if len(search_comment) == 0:
         # no header in the file

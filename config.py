@@ -1,4 +1,5 @@
-﻿__author__ = 'hchristol'
+﻿from builtins import object
+__author__ = 'hchristol'
 
 #json config file utility
 
@@ -32,7 +33,7 @@ def value(dico, cle, NoneValue=""):
     return dico[cle]
 
 
-class JsonFile:
+class JsonFile(object):
 
     def __init__(self, directoryPath=None):
         # load config file
@@ -48,6 +49,6 @@ class JsonFile:
         v=value(self.config, cle, NoneValue)
         if v is None:
             return False
-        if isinstance(v, str) or isinstance(v, unicode):
+        if isinstance(v, str) or isinstance(v, str):
             return v.lower() == "true"
         return False

@@ -20,6 +20,10 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import object
 
 import glob
 import os.path
@@ -34,24 +38,24 @@ from qgis.gui import QgsMessageBar
 from qgis.core import QgsMessageLog
 
 # Initialize Qt resources from file resources.py
-import resources
+from . import resources
 
-from config import JsonFile
+from .config import JsonFile
 from shutil import copyfile
 
-import translate
-from customSqlQuery import CustomSqlQuery
-from dbrequest import Connection
-from dbrequest import makeSqlValidForLayer
-from query_param import QueryParamDialog
+from . import translate
+from .customSqlQuery import CustomSqlQuery
+from .dbrequest import Connection
+from .dbrequest import makeSqlValidForLayer
+from .query_param import QueryParamDialog
 
 
 # Import the code for the DockWidget
-from shared_sqlqueries_dockwidget import SharedSqlQueriesDockWidget
+from .shared_sqlqueries_dockwidget import SharedSqlQueriesDockWidget
 
 
 
-class SharedSqlQueries:
+class SharedSqlQueries(object):
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -391,7 +395,7 @@ class SharedSqlQueries:
             self.errorMessage(e.text)
             return
         except Exception as e:
-            self.errorMessage(unicode(e))
+            self.errorMessage(str(e))
             return
 
 
@@ -480,7 +484,7 @@ class SharedSqlQueries:
                             QApplication.setOverrideCursor(Qt.ArrowCursor)
                             self.errorMessage(self.tr(u"Unable to add a layer corresponding to this query !") + sql)
                             # sql which is used in layer query
-                            print makeSqlValidForLayer(sql)
+                            print(makeSqlValidForLayer(sql))
                             return
 
                         # if there's a qml style file corresponding to the query, apply it to the newly added layer
@@ -546,7 +550,7 @@ class SharedSqlQueries:
         dresult.line_edit_file.setText(filepath)
         model = None
 
-        from tools import export
+        from .tools import export
         QApplication.setOverrideCursor(Qt.WaitCursor)
         [header, data, rowCount] = self.dbrequest.sqlExec(sql)
         QApplication.setOverrideCursor(Qt.ArrowCursor)
@@ -574,7 +578,7 @@ def setWidgetWidth(widget, minwidth, maxwidth):
     widget.setMaximumWidth(maxwidth)
 
 def remove_accent(text):
-    if type(text) is unicode:
+    if type(text) is str:
         import unicodedata
         return unicodedata.normalize('NFD', text).encode('ascii', 'ignore')
     return text # str type

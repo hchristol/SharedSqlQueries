@@ -1,4 +1,6 @@
-﻿import os
+﻿from __future__ import absolute_import
+from builtins import str
+import os
 from PyQt4.uic import loadUiType
 from PyQt4.QtGui import QDialog, QLabel, QLineEdit, QDateEdit, QComboBox, QToolBar, QAction, QIcon, QColor
 from PyQt4.QtCore import Qt, QObject, SIGNAL
@@ -6,10 +8,10 @@ from PyQt4.QtCore import Qt, QObject, SIGNAL
 from qgis.gui import QgsMapCanvas, QgsRubberBand
 from qgis.core import QgsVectorLayer
 
-from customSqlQuery import CustomSqlQuery
-from translate import tr
+from .customSqlQuery import CustomSqlQuery
+from .translate import tr
 
-from tools import tools_points
+from .tools import tools_points
 
 FORM_CLASS, _ = loadUiType(os.path.join(
     os.path.dirname(__file__), 'query_param.ui'))
@@ -199,7 +201,7 @@ class QueryParamDialog(QDialog, FORM_CLASS):
             if header_or_param == "header":
                 listParam = self.query.header
 
-            for paramName in self.widgetParam[header_or_param].keys():
+            for paramName in list(self.widgetParam[header_or_param].keys()):
 
                 # widget linked to this parameter
                 widget = self.widgetParam[header_or_param][paramName]
@@ -236,7 +238,7 @@ class QueryParamDialog(QDialog, FORM_CLASS):
                         if currentFeature.fields().indexFromName(type_options) == -1:
                             self.errorMessage = tr(u"This feature does not have such an attribute : ") + type_options
                             continue
-                        param["value"] = unicode(currentFeature.attribute(type_options))
+                        param["value"] = str(currentFeature.attribute(type_options))
 
                     # geom attribut :
                     else:

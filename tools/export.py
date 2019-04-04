@@ -1,3 +1,6 @@
+from __future__ import print_function
+from builtins import str
+from builtins import range
 # -*- coding: utf-8 -*-
 
 # to export result of a query into listbox or xls file
@@ -32,7 +35,7 @@ def fillMultiColumnListWithData(list, data, headerStringArray, headerWidths=None
                     item = QtGui.QStandardItem(cell.strftime("%d-%m-%Y"))
                     item.setData(cell)
                 else :
-                    item=QtGui.QStandardItem(unicode(cell))
+                    item=QtGui.QStandardItem(str(cell))
                 item.setData(line, Qt.UserRole) # underlying data stored in item
                 values.append(item)
                 iColonne+=1
@@ -79,7 +82,7 @@ def exportQModeleToXls(filename, titre, model, openfile = False):
                 sh.write(row + 1, col, try_convert_into_number(value))
 
             except Exception as e:
-                print u"ERROR line " + str(row) + " : " + e.message + u"   problem here : " + unicode(value)
+                print(u"ERROR line " + str(row) + " : " + e.message + u"   problem here : " + str(value))
     try:
         # write file
         book.save(filename)
@@ -101,9 +104,9 @@ def exportQModeleToXls(filename, titre, model, openfile = False):
 # Try to convert a string into number, to have a proper type in xls export
 def try_convert_into_number(s):
     try:
-        return long(s)
+        return int(s)
     except ValueError:
         try:
             return float(s)
         except ValueError:
-            return unicode(s)
+            return str(s)
