@@ -26,6 +26,7 @@ import os
 
 from qgis.PyQt import QtGui, uic
 from qgis.PyQt.QtCore import pyqtSignal
+from qgis.PyQt.QtWidgets import QDockWidget
 
 from . import translate
 
@@ -33,7 +34,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'shared_sqlqueries_dockwidget_base.ui'))
 
 #TODO : deprecated, to be deleted
-class SharedSqlQueriesDockWidget(QtGui.QDockWidget, FORM_CLASS):
+class SharedSqlQueriesDockWidget(QDockWidget, FORM_CLASS):
 
     closingPlugin = pyqtSignal()
 

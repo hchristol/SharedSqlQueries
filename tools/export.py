@@ -6,7 +6,7 @@ from builtins import range
 # to export result of a query into listbox or xls file
 
 import os
-import PyQt4.Qt as qt 
+# import PyQt4.Qt as qt
 from qgis.PyQt import QtCore, QtGui
 from qgis.PyQt.QtCore import *
 from qgis.PyQt.QtGui import * 

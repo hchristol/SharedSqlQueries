@@ -37,6 +37,8 @@ from qgis.PyQt.QtWidgets import *
 from qgis.gui import QgsMessageBar
 from qgis.core import QgsMessageLog
 
+from qgis.core import Qgis
+
 # Initialize Qt resources from file resources.py
 from . import resources
 
@@ -409,7 +411,7 @@ class SharedSqlQueries(object):
             # format query as a Qgis readable sql source
             sql = query.updateFinalSql()
 
-            QgsMessageLog.logMessage(sql, "SharedSql", QgsMessageLog.INFO)
+            QgsMessageLog.logMessage(sql, "SharedSql", Qgis.MessageLevel.Info)
 
             # type of request :
             firstword = "" # first word of request : select, update, insert, delete
@@ -541,7 +543,8 @@ class SharedSqlQueries(object):
 
         # clean ascii file
         # and  (remove blank spaces which cause failure while opening file)
-        filepath = remove_accent(filepath).replace(" ", "_")
+        filepath = remove_accent(filepath)
+        filepath = filepath.replace(" ", "_")
 
         dresult = listDialog(None)
         dresult.setWindowTitle(translate.tr(u"Result"))
@@ -580,7 +583,7 @@ def setWidgetWidth(widget, minwidth, maxwidth):
 def remove_accent(text):
     if type(text) is str:
         import unicodedata
-        return unicodedata.normalize('NFD', text).encode('ascii', 'ignore')
+        return unicode(  unicodedata.normalize('NFD', text).encode('ascii', 'ignore')  )
     return text # str type
 
 
