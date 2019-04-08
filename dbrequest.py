@@ -159,15 +159,16 @@ class Connection(object):
         # layer postgis to read features
         pg_layer = QgsVectorLayer(self.uri.uri(), "temporary layer", "postgres")
 
-        error = QgsVectorFileWriter.writeAsVectorFormat(pg_layer, layer_path, "utf-8", None, ogr_driver)
+        errorCode, errorMessage = QgsVectorFileWriter.writeAsVectorFormat(layer=pg_layer, fileName=layer_path, fileEncoding="utf-8",
+                                                        destCRS=QgsCoordinateReferenceSystem(), driverName=ogr_driver)
 
-        if error == QgsVectorFileWriter.NoError:
+        if errorCode == QgsVectorFileWriter.NoError:
             file_layer = QgsVectorLayer(layer_path, layer_name, "ogr")
             return addLayer(file_layer)
         else:
             exc = SyntaxError()
-            exc.text = u"QgsVectorFileWriter error : " + str(error)
-            raise sql
+            exc.text = u"QgsVectorFileWriter error : " + errorMessage
+            raise exc
 
     # fill a QtWidget (QComboBox) with the result of an sql query
     def sqlFillQtWidget(self, sql, list):

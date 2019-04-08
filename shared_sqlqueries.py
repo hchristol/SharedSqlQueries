@@ -562,7 +562,8 @@ class SharedSqlQueries(object):
             model = export.fillMultiColumnListWithData(dresult.list_queryresult, data, header)
 
         def open_file():
-            finalfilepath = remove_accent(dresult.line_edit_file.text()).replace(" ", "_")
+            finalfilepath = remove_accent( str(dresult.line_edit_file.text()).replace(" ", "_"))
+            print( finalfilepath )
             if model is not None:
                 export.exportQModeleToXls(finalfilepath, translate.tr(u"Result"), model, True)
 
@@ -583,7 +584,7 @@ def setWidgetWidth(widget, minwidth, maxwidth):
 def remove_accent(text):
     if type(text) is str:
         import unicodedata
-        return unicode(  unicodedata.normalize('NFD', text).encode('ascii', 'ignore')  )
+        return str( unicodedata.normalize('NFD', text).encode('ascii', 'ignore') ).replace("b'","").strip("'")
     return text # str type
 
 

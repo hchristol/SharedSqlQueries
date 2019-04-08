@@ -94,6 +94,7 @@ def exportQModeleToXls(filename, titre, model, openfile = False):
     if openfile:
         try:
             # import os
+            # os.startfile(filename)
             import subprocess
             subprocess.Popen(filename, shell=True)
         except BaseException:
