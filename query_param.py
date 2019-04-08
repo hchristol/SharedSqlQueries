@@ -4,7 +4,7 @@ import os
 from qgis.PyQt.uic import loadUiType
 from qgis.PyQt.QtGui import * 
 from qgis.PyQt.QtWidgets import *
-from qgis.PyQt.QtCore import Qt, QObject, SIGNAL
+from qgis.PyQt.QtCore import Qt, QObject
 
 from qgis.gui import QgsMapCanvas, QgsRubberBand
 from qgis.core import QgsVectorLayer
@@ -179,9 +179,11 @@ class QueryParamDialog(QDialog, FORM_CLASS):
             ActivateTool(self.iface.mapCanvas(), tool, state, self.tools)
 
             # edit event
-            QObject.disconnect(tool, SIGNAL("evInit(QgsGeometry*)"), geometryEdited)
+            try :
+                tool.created.disconnect(geometryEdited)
+            except : pass
             if state:
-                QObject.connect(tool, SIGNAL("evInit(QgsGeometry*)"), geometryEdited)
+                tool.created.connect(geometryEdited)
 #            else:
 #                self.editedGeom=None
 

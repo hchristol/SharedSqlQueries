@@ -29,7 +29,9 @@ from qgis.core import *
 from qgis.gui import *
 
 class CreatePointTool(QgsMapTool):
-    
+
+    created = pyqtSignal(QgsGeometry)
+
     def __init__(self, canvas, deltaAngle = -90):
         QgsMapTool.__init__(self, canvas)
         self.mCanvas = canvas
@@ -95,7 +97,7 @@ class CreatePointTool(QgsMapTool):
         self.mRb.setToGeometry(newGeom, None)
 
         # event end editing geom
-        self.emit(SIGNAL("evInit(QgsGeometry*)"), newGeom )
+        self.created.emit(newGeom)
 
     
     def activate(self):
@@ -106,7 +108,7 @@ class CreatePointTool(QgsMapTool):
             self.mRb.reset(True)
             self.mRb = None
         if self != None:
-            self.emit(SIGNAL("evDeactivated(PyQt_PyObject)"), self)
+            self.deactivated.emit()
 
     def isZoomTool(self):
         return False
@@ -119,6 +121,9 @@ class CreatePointTool(QgsMapTool):
 
 
 class CreateLineTool(QgsMapTool):
+
+    created = pyqtSignal(QgsGeometry)
+
     def __init__(self, canvas, deltaAngle=-90):
         QgsMapTool.__init__(self, canvas)
         self.mCanvas = canvas
@@ -212,7 +217,7 @@ class CreateLineTool(QgsMapTool):
             self.mGeom = QgsGeometry().fromPolyline(self.mPoints)
 
         # end editing event
-        self.emit(SIGNAL("evInit(QgsGeometry*)"), self.mGeom)
+        self.created.emit(self.mGeom)
 
     def activate(self):
         self.mCanvas.setCursor(self.cursor)
@@ -225,7 +230,7 @@ class CreateLineTool(QgsMapTool):
             self.mRb2.reset(True)
             self.mRb2 = None
         if self != None:
-            self.emit(SIGNAL("evDeactivated(PyQt_PyObject)"), self)
+            self.deactivated.emit()
 
     def isZoomTool(self):
         return False
@@ -239,6 +244,9 @@ class CreateLineTool(QgsMapTool):
 
 
 class CreatePolygonTool(QgsMapTool):
+
+    created = pyqtSignal(QgsGeometry)
+
     def __init__(self, canvas, deltaAngle=-90):
         QgsMapTool.__init__(self, canvas)
         self.mCanvas = canvas
@@ -332,7 +340,7 @@ class CreatePolygonTool(QgsMapTool):
             self.mGeom = QgsGeometry().fromPolygonXY([self.mPoints])
 
         # end editing event
-        self.emit(SIGNAL("evInit(QgsGeometry*)"), self.mGeom)
+        self.created.emit(self.mGeom)
 
     def activate(self):
         self.mCanvas.setCursor(self.cursor)
@@ -345,7 +353,7 @@ class CreatePolygonTool(QgsMapTool):
             self.mRb2.reset(True)
             self.mRb2 = None
         if self != None:
-            self.emit(SIGNAL("evDeactivated(PyQt_PyObject)"), self)
+            self.deactivated.emit()
 
     def isZoomTool(self):
         return False
