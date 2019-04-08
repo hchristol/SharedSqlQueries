@@ -2,7 +2,8 @@
 from builtins import str
 import os
 from qgis.PyQt.uic import loadUiType
-from qgis.PyQt.QtGui import QDialog, QLabel, QLineEdit, QDateEdit, QComboBox, QToolBar, QAction, QIcon, QColor
+from qgis.PyQt.QtGui import * 
+from qgis.PyQt.QtWidgets import *
 from qgis.PyQt.QtCore import Qt, QObject, SIGNAL
 
 from qgis.gui import QgsMapCanvas, QgsRubberBand

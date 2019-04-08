@@ -31,8 +31,8 @@ import os.path
 from qgis.PyQt import uic
 
 from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtGui import QStandardItem, QIcon, QAction, QComboBox, QSizePolicy, \
-    QStandardItemModel, QTreeView, QPushButton, QHBoxLayout, QDialog, QApplication
+from qgis.PyQt.QtGui import * 
+from qgis.PyQt.QtWidgets import *
 
 from qgis.gui import QgsMessageBar
 from qgis.core import QgsMessageLog
